@@ -7,16 +7,102 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>mockbuster-service</module>
+        <module>mockbuster-decoder</module>
+        <module>mockbuster-saml2</module>
+        <module>mockbuster-core</module>
         <module>mockbuster-web</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>ch.alni</groupId>
+                <artifactId>mockbuster-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.alni</groupId>
+                <artifactId>mockbuster-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.alni</groupId>
+                <artifactId>mockbuster-saml2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.alni</groupId>
+                <artifactId>mockbuster-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.spring.platform</groupId>
+                <artifactId>platform-bom</artifactId>
+                <version>Athens-SR1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>1.7.22</version>
             </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.1.8</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.10</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml</artifactId>
+                <version>2.6.4</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>2.3.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.easytesting</groupId>
+                <artifactId>fest-assert</artifactId>
+                <version>1.4</version>
+            </dependency>
+
+
         </dependencies>
 
     </dependencyManagement>
@@ -52,6 +138,22 @@
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.jvnet.jaxb2.maven2</groupId>
+                    <artifactId>maven-jaxb2-plugin</artifactId>
+                    <version>0.13.1</version>
+                    <configuration>
+                        <plugins>
+                            <plugin>
+                                <groupId>net.codesup.util</groupId>
+                                <artifactId>jaxb2-rich-contract-plugin</artifactId>
+                                <version>1.18.0</version>
+                            </plugin>
+                        </plugins>
+                    </configuration>
+                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
