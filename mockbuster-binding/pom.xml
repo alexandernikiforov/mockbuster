@@ -28,7 +28,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mockbuster-service</artifactId>
+    <artifactId>mockbuster-binding</artifactId>
 
     <dependencies>
         <dependency>
@@ -38,12 +38,7 @@
 
         <dependency>
             <groupId>ch.alni</groupId>
-            <artifactId>mockbuster-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <artifactId>mockbuster-service</artifactId>
         </dependency>
 
         <dependency>
@@ -52,14 +47,44 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
-
-    <build>
-
-    </build>
 
 </project>
