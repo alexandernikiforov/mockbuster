@@ -16,11 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.signature;
+package ch.alni.mockbuster.signature.pkix;
 
-import org.w3c.dom.Document;
+import java.security.cert.X509Certificate;
+import java.time.LocalDate;
+import java.util.List;
 
-public interface SignatureValidationService {
+/**
+ * TODO: javadoc
+ */
+public interface X509CertPathValidator {
 
-    boolean containsValidSignature(Document document, SignatureLocation signatureLocation);
+    X509CertPathValidationResult isValidOn(List<X509Certificate> x509CertificateList, LocalDate validityDate);
 }

@@ -18,7 +18,7 @@
     Automatique, Keio University). All Rights Reserved.
     http://www.w3.org/Consortium/Legal/
 
-    This document is governed by the W3C Software License [1] as described
+    This dom is governed by the W3C Software License [1] as described
     in the FAQ [2].
 
     [1] http://www.w3.org/Consortium/Legal/copyright-software-19980720
@@ -26,8 +26,8 @@
 -->
 
 
-<schema xmlns="http://www.w3.org/2001/XMLSchema"
-        xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+<schema xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+        xmlns="http://www.w3.org/2001/XMLSchema"
         targetNamespace="http://www.w3.org/2000/09/xmldsig#"
         version="0.1" elementFormDefault="qualified"> 
 

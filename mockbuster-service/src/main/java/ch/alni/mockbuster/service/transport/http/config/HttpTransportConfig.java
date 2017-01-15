@@ -16,11 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.signature;
+package ch.alni.mockbuster.service.transport.http.config;
 
-import org.w3c.dom.Document;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
-public interface SignatureValidationService {
+import ch.alni.mockbuster.service.transport.http.HttpMessageTransport;
 
-    boolean containsValidSignature(Document document, SignatureLocation signatureLocation);
+@Configuration
+@ComponentScan(basePackageClasses = HttpMessageTransport.class)
+public class HttpTransportConfig {
 }

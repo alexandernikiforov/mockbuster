@@ -16,11 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.signature;
+package ch.alni.mockbuster.signature.pkix;
 
-import org.w3c.dom.Document;
+import java.security.KeyStore;
 
-public interface SignatureValidationService {
-
-    boolean containsValidSignature(Document document, SignatureLocation signatureLocation);
+/**
+ * Returns the trust store in the form of a JKS key store to get the most trusted certificates for PKIX certificates
+ * path validation.
+ */
+public interface TrustStoreProvider {
+    KeyStore getTrustStore();
 }

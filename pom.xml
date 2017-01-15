@@ -9,7 +9,7 @@
     <modules>
         <module>mockbuster-service</module>
         <module>mockbuster-signature</module>
-        <module>mockbuster-binding</module>
+        <module>mockbuster-dom</module>
         <module>mockbuster-saml2</module>
         <module>mockbuster-core</module>
         <module>mockbuster-web</module>
@@ -32,6 +32,12 @@
             <dependency>
                 <groupId>ch.alni</groupId>
                 <artifactId>mockbuster-saml2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.alni</groupId>
+                <artifactId>mockbuster-dom</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

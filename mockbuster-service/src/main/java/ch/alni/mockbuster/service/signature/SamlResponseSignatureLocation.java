@@ -39,7 +39,7 @@ public class SamlResponseSignatureLocation implements SignatureLocation {
                 "Status");
 
         if (nodeList.getLength() < 1) {
-            throw new IllegalArgumentException("provided document is not a valid SAML response, it does not contain Status element");
+            throw new IllegalArgumentException("provided dom is not a valid SAML response, it does not contain Status element");
         }
 
         return nodeList.item(0);

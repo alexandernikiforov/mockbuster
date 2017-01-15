@@ -16,11 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.signature;
+package ch.alni.mockbuster.service.binding;
 
 import org.w3c.dom.Document;
 
-public interface SignatureValidationService {
+/**
+ * Interface to deflate and encode request and response objects.
+ */
+public interface MessageTransport {
 
-    boolean containsValidSignature(Document document, SignatureLocation signatureLocation);
+    /**
+     * Returns SAML dom (DOM) from the request.
+     *
+     * @param request request string containing encoded SAML 2.0 request
+     */
+    Document processRequest(String request);
+
+    /**
+     * Encodes the given SAML response dom as string that will be transferred to the caller.
+     *
+     * @param response response dom
+     */
+    String encodeResponse(Document response);
 }

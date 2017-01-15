@@ -38,6 +38,11 @@
 
         <dependency>
             <groupId>ch.alni</groupId>
+            <artifactId>mockbuster-dom</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.alni</groupId>
             <artifactId>mockbuster-core</artifactId>
         </dependency>
 
