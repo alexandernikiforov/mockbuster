@@ -97,6 +97,6 @@ public class PKIXCertPathValidator implements X509CertPathValidator {
         } catch (InvalidAlgorithmParameterException e) {
             throw new IllegalArgumentException("invalid parameters to validate X509 certificate path", e);
         }
-
     }
+
 }

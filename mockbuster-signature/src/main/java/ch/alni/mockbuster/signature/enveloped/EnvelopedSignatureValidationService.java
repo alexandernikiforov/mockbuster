@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import java.util.Optional;
 
@@ -53,7 +52,7 @@ public class EnvelopedSignatureValidationService implements SignatureValidationS
     @Override
     public boolean containsValidSignature(Document document, SignatureLocation signatureLocation) {
 
-        Optional<Node> signatureNodeOptional = findSignatureNode(document, signatureLocation);
+        Optional<Node> signatureNodeOptional = signatureLocation.findSignatureNode(document);
         if (!signatureNodeOptional.isPresent()) {
             LOG.info("cannot find signature in the dom");
             return false;
@@ -78,18 +77,4 @@ public class EnvelopedSignatureValidationService implements SignatureValidationS
         }
     }
 
-    private Optional<Node> findSignatureNode(Document document, SignatureLocation signatureLocation) {
-        NodeList signatureNodeList = document.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
-        for (int i = 0; i < signatureNodeList.getLength(); i++) {
-            Node signatureNode = signatureNodeList.item(i);
-            if (signatureNode.getParentNode().isEqualNode(signatureLocation.getParentNode(document)) &&
-                    signatureNode.getNextSibling().isEqualNode(signatureLocation.getNextSiblingNode(document))) {
-
-                return Optional.of(signatureNode);
-            }
-        }
-
-        return Optional.empty();
-
-    }
 }

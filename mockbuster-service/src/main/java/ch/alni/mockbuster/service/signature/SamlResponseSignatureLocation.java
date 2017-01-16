@@ -25,11 +25,11 @@ import org.w3c.dom.NodeList;
 /**
  * Strategy to place signature on the SAML response.
  */
-public class SamlResponseSignatureLocation implements SignatureLocation {
+public class SamlResponseSignatureLocation extends SignatureLocation {
 
     @Override
     public Node getParentNode(Document document) {
-        return document.getDocumentElement();
+        return document.getParentNode();
     }
 
     @Override

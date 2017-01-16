@@ -20,12 +20,35 @@ package ch.alni.mockbuster.service.signature;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.Optional;
+
+import javax.xml.crypto.dsig.XMLSignature;
 
 /**
- * Strategy interface to find location of the signature.
+ * Strategy to find location of the signature.
  */
-public interface SignatureLocation {
-    Node getParentNode(Document document);
+public abstract class SignatureLocation {
 
-    Node getNextSiblingNode(Document document);
+    public Optional<Node> findSignatureNode(Document document) {
+        final Node parentNode = getParentNode(document);
+
+        NodeList signatureNodeList = document.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+
+        for (int i = 0; i < signatureNodeList.getLength(); i++) {
+            Node signatureNode = signatureNodeList.item(i);
+            if (signatureNode.getParentNode().isEqualNode(parentNode) &&
+                    signatureNode.getNextSibling().isEqualNode(getNextSiblingNode(document))) {
+
+                return Optional.of(signatureNode);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public abstract Node getParentNode(Document document);
+
+    public abstract Node getNextSiblingNode(Document document);
 }
