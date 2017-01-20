@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.signature;
+package ch.alni.mockbuster.signature;
 
 import org.w3c.dom.Document;
 
-public interface SignatureValidationService {
+public interface SignatureService {
 
-    boolean containsValidSignature(Document document, SignatureLocation signatureLocation);
+    void sign(Document document, SignatureProperties signatureProperties);
 }

@@ -20,7 +20,11 @@ package ch.alni.mockbuster.service.signature;
 
 import org.w3c.dom.Document;
 
+/**
+ * Signature interface for the application core
+ */
 public interface SignatureService {
+    void signResponseDocument(Document document);
 
-    void sign(Document document, SignatureLocation signatureLocation);
+    boolean isRequestSignatureValid(Document document);
 }

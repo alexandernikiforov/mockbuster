@@ -16,13 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.signature.pkix;
+package ch.alni.mockbuster.saml2;
 
-import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-public interface X509CertPathValidator {
-
-    X509CertPathValidationResult isValidOn(List<X509Certificate> x509CertificateList, LocalDateTime validityDate);
+/**
+ * SAML 2.0 namespace URIs.
+ */
+public interface Saml2NamespaceUri {
+    String SAML2_ASSERTION_NAMESPACE_URI = "urn:oasis:names:tc:SAML:2.0:assertion";
+    String SAML2_METADATA_NAMESPACE_URI = "urn:oasis:names:tc:SAML:2.0:metadata";
+    String SAML2_PROTOCOL_NAMESPACE_URI = "urn:oasis:names:tc:SAML:2.0:protocol";
+    String XENC_NAMESPACE_URI = "http://www.w3.org/2001/04/xmlenc#";
+    String XMLSIG_CORE_NAMESPACE_URI = "http://www.w3.org/2000/09/xmldsig#";
 }

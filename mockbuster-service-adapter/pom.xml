@@ -28,18 +28,17 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mockbuster-signature</artifactId>
+    <artifactId>mockbuster-service-adapter</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>ch.alni</groupId>
-            <artifactId>mockbuster-dom</artifactId>
+            <artifactId>mockbuster-service</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>ch.alni</groupId>
+            <artifactId>mockbuster-signature</artifactId>
         </dependency>
 
         <dependency>
@@ -53,8 +52,14 @@
         </dependency>
 
         <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -80,6 +85,7 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
 </project>

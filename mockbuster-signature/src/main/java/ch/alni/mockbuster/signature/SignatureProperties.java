@@ -16,13 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.signature.pkix;
+package ch.alni.mockbuster.signature;
 
-import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
-import java.util.List;
+import org.w3c.dom.Node;
 
-public interface X509CertPathValidator {
+import java.util.Optional;
 
-    X509CertPathValidationResult isValidOn(List<X509Certificate> x509CertificateList, LocalDateTime validityDate);
+/**
+ * Where to place the signature
+ */
+public interface SignatureProperties {
+
+    String getReferenceUri();
+
+    Node getParentNode();
+
+    Optional<Node> findNextSiblingNode();
 }

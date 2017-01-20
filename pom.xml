@@ -8,6 +8,7 @@
 
     <modules>
         <module>mockbuster-service</module>
+        <module>mockbuster-service-adapter</module>
         <module>mockbuster-signature</module>
         <module>mockbuster-dom</module>
         <module>mockbuster-saml2</module>
@@ -22,6 +23,19 @@
                 <artifactId>mockbuster-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>ch.alni</groupId>
+                <artifactId>mockbuster-service-adapter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.alni</groupId>
+                <artifactId>mockbuster-signature</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>ch.alni</groupId>

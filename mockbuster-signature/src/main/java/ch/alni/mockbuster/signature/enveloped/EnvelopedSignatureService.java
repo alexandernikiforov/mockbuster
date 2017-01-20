@@ -45,8 +45,8 @@ import javax.xml.crypto.dsig.keyinfo.X509Data;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 
-import ch.alni.mockbuster.service.signature.SignatureLocation;
-import ch.alni.mockbuster.service.signature.SignatureService;
+import ch.alni.mockbuster.signature.SignatureProperties;
+import ch.alni.mockbuster.signature.SignatureService;
 
 /**
  * How to make an ENVELOPED signature in the XML dom.
@@ -63,7 +63,7 @@ public class EnvelopedSignatureService implements SignatureService {
     }
 
     @Override
-    public void sign(Document document, SignatureLocation signatureLocation) {
+    public void sign(Document document, SignatureProperties signatureProperties) {
         try {
             DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(
                     signatureConfiguration.getDigestMethodUri(), null);
@@ -72,7 +72,8 @@ public class EnvelopedSignatureService implements SignatureService {
                     xmlSignatureFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)
             );
 
-            Reference reference = xmlSignatureFactory.newReference("", digestMethod, transformList, null, null);
+            Reference reference = xmlSignatureFactory.newReference(signatureProperties.getReferenceUri(),
+                    digestMethod, transformList, null, null);
 
             CanonicalizationMethod canonicalizationMethod = xmlSignatureFactory.newCanonicalizationMethod(
                     CanonicalizationMethod.INCLUSIVE_WITH_COMMENTS,
@@ -94,11 +95,15 @@ public class EnvelopedSignatureService implements SignatureService {
             X509Data x509Data = keyInfoFactory.newX509Data(signatureConfiguration.getSignatureValidatingCertPath());
             KeyInfo keyInfo = keyInfoFactory.newKeyInfo(Collections.singletonList(x509Data));
 
-            DOMSignContext signContext = new DOMSignContext(
-                    signatureConfiguration.getSigningKey(),
-                    signatureLocation.getParentNode(document),
-                    signatureLocation.getNextSiblingNode(document)
-            );
+            DOMSignContext signContext = signatureProperties.findNextSiblingNode()
+                    .map(nextSiblingNode -> new DOMSignContext(
+                            signatureConfiguration.getSigningKey(),
+                            signatureProperties.getParentNode(),
+                            nextSiblingNode))
+
+                    .orElse(new DOMSignContext(
+                            signatureConfiguration.getSigningKey(),
+                            signatureProperties.getParentNode()));
 
             XMLSignature xmlSignature = xmlSignatureFactory.newXMLSignature(signedInfo, keyInfo);
             xmlSignature.sign(signContext);

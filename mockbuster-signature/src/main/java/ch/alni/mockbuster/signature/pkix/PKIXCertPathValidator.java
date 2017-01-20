@@ -32,8 +32,8 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 
@@ -67,13 +67,12 @@ public class PKIXCertPathValidator implements X509CertPathValidator {
         this.trustStoreProvider = trustStoreProvider;
     }
 
-    private static Date toDate(LocalDate localDate) {
-        ZoneId systemZoneId = ZoneId.systemDefault();
-        return Date.from(localDate.atStartOfDay(systemZoneId).toInstant());
+    private static Date toDate(LocalDateTime localDate) {
+        return Date.from(localDate.toInstant(ZoneOffset.UTC));
     }
 
     @Override
-    public X509CertPathValidationResult isValidOn(List<X509Certificate> x509CertificateList, LocalDate validityDate) {
+    public X509CertPathValidationResult isValidOn(List<X509Certificate> x509CertificateList, LocalDateTime validityDate) {
         try {
             CertPath certPath = certificateFactory.generateCertPath(x509CertificateList);
             PKIXParameters pkixParameters = new PKIXParameters(trustStoreProvider.getTrustStore());

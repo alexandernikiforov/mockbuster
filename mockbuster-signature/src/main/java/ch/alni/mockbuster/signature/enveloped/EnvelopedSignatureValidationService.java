@@ -33,8 +33,8 @@ import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 
-import ch.alni.mockbuster.service.signature.SignatureLocation;
-import ch.alni.mockbuster.service.signature.SignatureValidationService;
+import ch.alni.mockbuster.signature.SignatureLocation;
+import ch.alni.mockbuster.signature.SignatureValidationService;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -52,7 +52,7 @@ public class EnvelopedSignatureValidationService implements SignatureValidationS
     @Override
     public boolean containsValidSignature(Document document, SignatureLocation signatureLocation) {
 
-        Optional<Node> signatureNodeOptional = signatureLocation.findSignatureNode(document);
+        Optional<Node> signatureNodeOptional = signatureLocation.findSignatureNode();
         if (!signatureNodeOptional.isPresent()) {
             LOG.info("cannot find signature in the dom");
             return false;

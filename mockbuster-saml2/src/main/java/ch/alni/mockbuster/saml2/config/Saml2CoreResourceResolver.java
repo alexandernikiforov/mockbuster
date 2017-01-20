@@ -24,12 +24,13 @@ import org.w3c.dom.ls.LSResourceResolver;
 import java.util.HashMap;
 import java.util.Map;
 
+import static ch.alni.mockbuster.saml2.Saml2NamespaceUri.SAML2_ASSERTION_NAMESPACE_URI;
+import static ch.alni.mockbuster.saml2.Saml2NamespaceUri.SAML2_METADATA_NAMESPACE_URI;
+import static ch.alni.mockbuster.saml2.Saml2NamespaceUri.SAML2_PROTOCOL_NAMESPACE_URI;
+import static ch.alni.mockbuster.saml2.Saml2NamespaceUri.XENC_NAMESPACE_URI;
+import static ch.alni.mockbuster.saml2.Saml2NamespaceUri.XMLSIG_CORE_NAMESPACE_URI;
+
 class Saml2CoreResourceResolver implements LSResourceResolver {
-    private final static String SAML2_ASSERTION_NAMESPACE_URI = "urn:oasis:names:tc:SAML:2.0:assertion";
-    private final static String SAML2_METADATA_NAMESPACE_URI = "urn:oasis:names:tc:SAML:2.0:metadata";
-    private final static String SAML2_PROTOCOL_NAMESPACE_URI = "urn:oasis:names:tc:SAML:2.0:protocol";
-    private final static String XENC_NAMESPACE_URI = "http://www.w3.org/2001/04/xmlenc#";
-    private final static String XMLSIG_CORE_NAMESPACE_URI = "http://www.w3.org/2000/09/xmldsig#";
 
     private final Map<String, String> schemaTable = new HashMap<>();
 
