@@ -25,7 +25,7 @@ import java.io.File;
 
 import ch.alni.mockbuster.core.PrincipalRepository;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class InMemoryPrincipalRepositoryFactoryTest {
     private InMemoryPrincipalRepositoryFactory factory;

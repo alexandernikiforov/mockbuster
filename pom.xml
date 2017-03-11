@@ -50,12 +50,6 @@
 
             <dependency>
                 <groupId>ch.alni</groupId>
-                <artifactId>mockbuster-dom</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>ch.alni</groupId>
                 <artifactId>mockbuster-web</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -93,6 +87,12 @@
             </dependency>
 
             <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.5</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.opensaml</groupId>
                 <artifactId>opensaml</artifactId>
                 <version>2.6.4</version>
@@ -122,6 +122,11 @@
                 <version>1.4</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.6.1</version>
+            </dependency>
 
         </dependencies>
 

@@ -39,7 +39,7 @@ import ch.alni.mockbuster.signature.enveloped.SignatureConfiguration;
 import ch.alni.mockbuster.signature.pkix.PKIXCertPathValidator;
 import ch.alni.mockbuster.signature.pkix.X509CertPathBasedKeySelector;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

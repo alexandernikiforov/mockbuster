@@ -31,7 +31,7 @@ import ch.alni.mockbuster.service.dom.Documents;
 import ch.alni.mockbuster.service.saml2.Saml2ObjectMarshaller;
 import ch.alni.mockbuster.service.saml2.Saml2ObjectUnmarshaller;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Saml2CoreTest {
 
