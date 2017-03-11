@@ -48,12 +48,6 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.alni</groupId>
-            <artifactId>mockbuster-dom</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

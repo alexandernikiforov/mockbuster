@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
-import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
+import ch.alni.mockbuster.service.saml2.Saml2NamespaceUri;
 import ch.alni.mockbuster.signature.SignatureProperties;
 
 /**

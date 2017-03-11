@@ -18,6 +18,10 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>ch.alni</groupId>
+            <artifactId>mockbuster-saml2</artifactId>
+        </dependency>
     </dependencies>
     <build>
 

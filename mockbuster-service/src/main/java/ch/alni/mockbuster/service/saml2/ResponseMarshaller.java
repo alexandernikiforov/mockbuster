@@ -16,10 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.saml2;
 
-/**
- * TODO: javadoc
- */
-public interface AuthRequestRepository {
+import org.oasis.saml2.protocol.ResponseType;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.validation.Schema;
+
+public class ResponseMarshaller extends Saml2ObjectMarshaller<ResponseType> {
+    public ResponseMarshaller(JAXBContext jaxbContext, Schema schema) {
+        super(jaxbContext, schema);
+    }
+
+    @Override
+    protected JAXBElement<ResponseType> createJaxbElement(ResponseType samlObject) {
+        return getObjectFactory().createResponse(samlObject);
+    }
 }

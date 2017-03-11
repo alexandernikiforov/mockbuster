@@ -21,7 +21,7 @@ package ch.alni.mockbuster.signature.pkix;
 import java.security.KeyStore;
 
 /**
- * Returns the trust store in the form of a JKS key store to get the most trusted certificates for PKIX certificates
+ * Returns the trust store in the form of a JKS key store to get the most trusted certificates for PKIX certificate
  * path validation.
  */
 public interface TrustStoreProvider {

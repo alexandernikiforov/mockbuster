@@ -18,42 +18,15 @@
 
 package ch.alni.mockbuster.service;
 
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-
-import ch.alni.mockbuster.service.process.RequestChainFactory;
-import ch.alni.mockbuster.service.process.ServiceRequest;
-import ch.alni.mockbuster.service.process.ServiceResponse;
-
 /**
  * Entry point for the Mockbuster service.
  */
-@Service
-public class MockbusterService {
-
-    private final RequestChainFactory requestChainFactory;
-
-    @Inject
-    public MockbusterService(RequestChainFactory requestChainFactory) {
-        this.requestChainFactory = requestChainFactory;
-    }
+public interface MockbusterService {
 
     /**
      * Authenticates the user.
      */
-    public void authenticate(ServiceRequest serviceRequest, ServiceResponse serviceResponse) {
-        requestChainFactory
-                .createAuthnRequestChain()
-                .doNext(serviceResponse, serviceRequest);
-    }
+    void authenticate(ServiceRequest serviceRequest, ServiceResponse serviceResponse);
 
-    /**
-     * Performs attribute query.
-     */
-    public void attributeQuery(ServiceRequest serviceRequest, ServiceResponse serviceResponse) {
-        requestChainFactory
-                .createAttributeQueryChain()
-                .doNext(serviceResponse, serviceRequest);
-    }
+    void logout(ServiceRequest serviceRequest, ServiceResponse serviceResponse);
 }

@@ -16,10 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.adapter.repository;
 
-/**
- * TODO: javadoc
- */
-public interface AuthRequestRepository {
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.HashSet;
+
+import static org.fest.assertions.Assertions.assertThat;
+
+public class PropertyNamesTest {
+    @Test
+    public void selectNames() throws Exception {
+        assertThat(PropertyNames.selectNames(new HashSet<>(Arrays.asList(
+                "user.1.id",
+                "user.1.display_name",
+                "user.2.id",
+                "user.2.display_name"
+        )))).containsOnly("user.1", "user.2");
+    }
+
 }

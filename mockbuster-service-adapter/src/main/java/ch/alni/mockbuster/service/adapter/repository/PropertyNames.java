@@ -16,10 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.adapter.repository;
 
-/**
- * TODO: javadoc
- */
-public interface AuthRequestRepository {
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+
+final class PropertyNames {
+    private final static Pattern namePattern = Pattern.compile("^(user\\.\\w+)\\.\\w+$");
+
+    private PropertyNames() {
+    }
+
+    static Set<String> selectNames(Set<String> propertyNames) {
+        return propertyNames.stream()
+                .map(namePattern::matcher)
+                .filter(Matcher::matches)
+                .map(matcher -> matcher.group(1))
+                .collect(Collectors.toSet());
+    }
 }

@@ -16,10 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.wbsso;
+
+import ch.alni.mockbuster.service.ServiceRequest;
+import ch.alni.mockbuster.service.ServiceResponse;
 
 /**
- * TODO: javadoc
+ * Is thrown when a logout request is received.
  */
-public interface AuthRequestRepository {
+public class LogoutRequestReceived extends SamlRequestReceived {
+
+    public LogoutRequestReceived(ServiceRequest serviceRequest, ServiceResponse serviceResponse) {
+        super(serviceRequest, serviceResponse);
+    }
 }

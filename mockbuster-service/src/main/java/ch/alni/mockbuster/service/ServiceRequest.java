@@ -16,10 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service;
 
 /**
- * TODO: javadoc
+ * Request to the service.
  */
-public interface AuthRequestRepository {
+public class ServiceRequest {
+    private final String request;
+
+    private final String relayState;
+
+    public ServiceRequest(String request, String relayState) {
+        this.request = request;
+        this.relayState = relayState;
+    }
+
+    public String getRequest() {
+        return request;
+    }
+
+    public String getRelayState() {
+        return relayState;
+    }
 }

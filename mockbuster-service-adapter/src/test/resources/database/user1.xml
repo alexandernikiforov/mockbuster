@@ -1,0 +1,18 @@
+<saml:AttributeStatement xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+    <saml:Attribute FriendlyName="First Name"
+                    Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
+                    NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+        <saml:AttributeValue xmlns:icc="http://schemas.xmlsoap.org/ws/2005/05/identity"
+                             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                             xsi:type="icc:StringMaxLength255MinLength1">Fred
+        </saml:AttributeValue>
+    </saml:Attribute>
+    <saml:Attribute FriendlyName="Last Name"
+                    Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+                    NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+        <saml:AttributeValue xmlns:icc="http://schemas.xmlsoap.org/ws/2005/05/identity"
+                             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                             xsi:type="icc:StringMaxLength255MinLength1">Feuerstein
+        </saml:AttributeValue>
+    </saml:Attribute>
+</saml:AttributeStatement>

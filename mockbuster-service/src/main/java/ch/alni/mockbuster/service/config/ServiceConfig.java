@@ -18,8 +18,23 @@
 
 package ch.alni.mockbuster.service.config;
 
+import org.oasis.saml2.protocol.ObjectFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import ch.alni.mockbuster.service.saml2.ResponseMarshaller;
+import ch.alni.mockbuster.service.saml2.Saml2CoreResourceResolver;
+import ch.alni.mockbuster.service.saml2.Saml2ObjectUnmarshaller;
 
 /**
  * Configuration for the Spring container.
@@ -27,4 +42,38 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("ch.alni.mockbuster.service")
 public class ServiceConfig {
+
+    JAXBContext jaxbContext() {
+        try {
+            return JAXBContext.newInstance(ObjectFactory.class);
+        } catch (JAXBException e) {
+            throw new IllegalStateException("cannot create JAXB context", e);
+        }
+    }
+
+    Schema schema() {
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        schemaFactory.setResourceResolver(new Saml2CoreResourceResolver());
+
+        try {
+            return schemaFactory.newSchema(new Source[]{
+                            new StreamSource(getClass().getResourceAsStream("/saml2/saml-schema-protocol-2.0.xsd"))
+                    }
+            );
+        } catch (SAXException e) {
+            throw new IllegalStateException("cannot create schema for SAML2 validation", e);
+        }
+    }
+
+    @Bean
+    public Saml2ObjectUnmarshaller saml2ObjectUnmarshaller() {
+        return new Saml2ObjectUnmarshaller(jaxbContext(), schema());
+    }
+
+    @Bean
+    public ResponseMarshaller responseMarshaller() {
+        return new ResponseMarshaller(jaxbContext(), schema());
+    }
+
+
 }

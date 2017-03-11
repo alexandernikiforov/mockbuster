@@ -18,13 +18,12 @@
 
 package ch.alni.mockbuster.service.adapter.signature;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
 
-import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -33,7 +32,7 @@ import java.util.List;
 
 import javax.xml.crypto.dsig.DigestMethod;
 
-import ch.alni.mockbuster.dom.Documents;
+import ch.alni.mockbuster.service.dom.Documents;
 import ch.alni.mockbuster.signature.enveloped.EnvelopedSignatureService;
 import ch.alni.mockbuster.signature.enveloped.EnvelopedSignatureValidationService;
 import ch.alni.mockbuster.signature.enveloped.SignatureConfiguration;
@@ -43,6 +42,9 @@ import ch.alni.mockbuster.signature.pkix.X509CertPathBasedKeySelector;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * Candidate for the integration test.
+ */
 public class EnvelopedSignatureServiceTest {
     private static final Logger LOG = getLogger(EnvelopedSignatureServiceTest.class);
 
@@ -94,15 +96,15 @@ public class EnvelopedSignatureServiceTest {
 
     @Test
     public void sign() throws Exception {
-        Document document = Documents.readToDocument(
-                new InputStreamReader(getClass().getResourceAsStream("/authn_request.xml"), "UTF-8"));
+        String request = IOUtils.toString(getClass().getResourceAsStream("/authn_request.xml"), "UTF-8");
+
+        Document document = Documents.toDocument(request);
 
         signatureService.sign(document, new AuthnRequestSignatureProperties(document));
 
-        StringWriter writer = new StringWriter();
-        Documents.toWriter(document, writer);
+        String signedRequest = Documents.toString(document);
 
-        LOG.info(writer.toString());
+        LOG.info(signedRequest);
 
         boolean result = signatureValidationService.containsValidSignature(document, new AuthnRequestSignatureLocation(document));
 

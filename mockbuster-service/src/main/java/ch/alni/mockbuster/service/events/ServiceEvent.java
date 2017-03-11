@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.events;
 
 /**
- * TODO: javadoc
+ * Marker interface for our events.
  */
-public interface AuthRequestRepository {
+public interface ServiceEvent {
 }

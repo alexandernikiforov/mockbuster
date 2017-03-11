@@ -33,11 +33,6 @@
     <dependencies>
 
         <dependency>
-            <groupId>ch.alni</groupId>
-            <artifactId>mockbuster-dom</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>

@@ -16,10 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service;
 
 /**
- * TODO: javadoc
+ * Interface for the service response.
  */
-public interface AuthRequestRepository {
+public interface ServiceResponse {
+    /**
+     * If the certificate cannot be validated.
+     */
+    void sendRequestDenied(String encodedSamlResponse);
+
+    void sendAuthenticated(String encodedSamlResponse);
+
+    void sendUserInteractionRequired();
+
+    void sendAttributes(String encodedSamlResponse);
+
+    void sendInvalidRequest();
 }
