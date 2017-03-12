@@ -49,6 +49,13 @@ public class ResponseSender {
     }
 
     @EventListener
+    public void onAuthenticated(LogoutResponsePrepared event) {
+        String response = prepareResponse(event.getResponseType());
+
+        event.getServiceResponse().sendAuthenticated(response);
+    }
+
+    @EventListener
     public void onInvalidSignatureResponse(InvalidSignatureResponsePrepared event) {
         String response = prepareResponse(event.getResponseType());
 

@@ -16,10 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.wbsso;
 
-/**
- * TODO: javadoc
- */
-public interface AuthRequestRepository {
+import org.oasis.saml2.protocol.ResponseType;
+
+import ch.alni.mockbuster.service.ServiceResponse;
+
+public class AuthenticatedResponsePrepared extends SamlResponsePrepared {
+
+    public AuthenticatedResponsePrepared(ServiceResponse serviceResponse, ResponseType responseType) {
+        super(serviceResponse, responseType);
+    }
 }
