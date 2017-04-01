@@ -25,36 +25,52 @@ import org.oasis.saml2.assertion.AuthnStatementType;
 import org.oasis.saml2.assertion.ConditionsType;
 import org.oasis.saml2.assertion.NameIDType;
 import org.oasis.saml2.assertion.ObjectFactory;
+import org.oasis.saml2.assertion.SubjectConfirmationDataType;
 import org.oasis.saml2.assertion.SubjectConfirmationType;
 import org.oasis.saml2.assertion.SubjectType;
 import org.oasis.saml2.protocol.AuthnRequestType;
 import org.oasis.saml2.protocol.ResponseType;
 import org.oasis.saml2.protocol.StatusCodeType;
 import org.oasis.saml2.protocol.StatusType;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import ch.alni.mockbuster.core.Principal;
+import ch.alni.mockbuster.service.ServiceConfiguration;
 
 /**
- * Response assembler
+ * Response assembler according to the rules of the Web SSO profile.
  */
 @Component
 class ResponseAssembler {
     private static final String SAML_VERSION = "2.0";
     private final ObjectFactory assertionObjectFactory = new ObjectFactory();
-    @Value("${mockbuster.issuer:mockbuster}")
-    private String responseIssuer;
+
+    private final ServiceConfiguration serviceConfiguration;
+
+    @Inject
+    ResponseAssembler(ServiceConfiguration serviceConfiguration) {
+        this.serviceConfiguration = serviceConfiguration;
+    }
 
     ResponseType toResponseType(Principal principal, AuthnRequestType request) {
-        String requestId = request.getID();
+        final String requestId = request.getID();
+        final String responseIssuer = serviceConfiguration.getResponseIssuer();
+
+        final Instant now = Instant.now();
+        final Instant deliveryNotOnOrAfter = now.plus(serviceConfiguration.getDeliveryValidityInSeconds(), ChronoUnit.SECONDS);
+
+        final Instant sessionNotOnOrAfter = serviceConfiguration.isSessionPermanent() ? null :
+                now.plus(serviceConfiguration.getSessionNotOnOrAfterInSeconds(), ChronoUnit.SECONDS);
 
         return ResponseType.builder()
                 .withID("_" + UUID.randomUUID().toString())
-                .withIssueInstant(Instant.now())
+                .withIssueInstant(now)
                 .withInResponseTo(requestId)
                 .withDestination(request.getAssertionConsumerServiceURL())
                 .withVersion(SAML_VERSION)
@@ -74,7 +90,7 @@ class ResponseAssembler {
 
                 .addAssertion(AssertionType.builder()
                         .withID("_" + UUID.randomUUID().toString())
-                        .withIssueInstant(Instant.now())
+                        .withIssueInstant(now)
                         .withIssuer(NameIDType.builder()
                                 .withFormat("urn:oasis:names:tc:SAML:2.0:nameid-format:entity")
                                 .withValue(responseIssuer)
@@ -86,15 +102,18 @@ class ResponseAssembler {
                                                 .withFormat(principal.getNameIdFormat())
                                                 .withValue(principal.getNameId())
                                                 .build()),
+
                                         assertionObjectFactory.createSubjectConfirmation(SubjectConfirmationType.builder()
                                                 .withMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer")
+                                                .withSubjectConfirmationData(SubjectConfirmationDataType.builder()
+                                                        .withNotBefore(now)
+                                                        .withNotOnOrAfter(deliveryNotOnOrAfter)
+                                                        .withInResponseTo(requestId)
+                                                        .build())
                                                 .build()))
                                 .build())
 
                         .withConditions(ConditionsType.builder()
-                                // TODO set the boundaries
-                                .withNotBefore(Instant.now())
-                                .withNotOnOrAfter(Instant.now())
                                 .addAudienceRestriction(AudienceRestrictionType.builder()
                                         .withAudience(request.getAssertionConsumerServiceURL())
                                         .build())
@@ -102,6 +121,7 @@ class ResponseAssembler {
 
                         .addAuthnStatement(AuthnStatementType.builder()
                                 .withAuthnInstant(Instant.now())
+                                .withSessionNotOnOrAfter(sessionNotOnOrAfter)
                                 .withAuthnContext(AuthnContextType.builder()
                                         .withContent(
                                                 assertionObjectFactory
