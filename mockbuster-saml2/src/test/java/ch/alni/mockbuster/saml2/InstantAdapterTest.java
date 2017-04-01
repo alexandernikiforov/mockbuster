@@ -16,29 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.response;
+package ch.alni.mockbuster.saml2;
 
-import org.oasis.saml2.protocol.RequestAbstractType;
-import org.oasis.saml2.protocol.ResponseType;
+import org.junit.Test;
 
 import java.time.Instant;
 
-/**
- * Fills out common information in a SAML 2.0 response.
- */
-public class CommonResponseBuilder {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    public static final String SAML_VERSION = "2.0";
+public class InstantAdapterTest {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InstantAdapterTest.class);
 
-    public ResponseType build(RequestAbstractType request) {
-        String responseId = request.getID();
+    @Test
+    public void parseDateTime() throws Exception {
+        Instant instant = InstantAdapter.parseDateTime("2002-05-30T09:30:10");
+        assertThat(instant).isNotNull();
 
-        final ResponseType response = ResponseType.builder()
-                .withIssueInstant(Instant.now())
-                .withInResponseTo(responseId)
-                .withVersion(SAML_VERSION)
-                .build();
+        String result = InstantAdapter.toDateTime(instant);
 
-        return response;
+        LOG.debug(result);
+
     }
+
 }

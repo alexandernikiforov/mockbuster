@@ -20,6 +20,7 @@ package ch.alni.mockbuster.service.wbsso;
 
 import org.oasis.saml2.assertion.NameIDType;
 import org.oasis.saml2.protocol.AuthnRequestType;
+import org.oasis.saml2.protocol.ResponseType;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -38,11 +39,15 @@ import ch.alni.mockbuster.service.events.ServiceEventPublisher;
 public class AuthnRequestProcessor {
     private final AuthnRequestRepository authnRequestRepository;
     private final PrincipalRepository principalRepository;
+    private final ResponseAssembler responseAssembler;
 
     @Inject
-    public AuthnRequestProcessor(AuthnRequestRepository authnRequestRepository, PrincipalRepository principalRepository) {
+    public AuthnRequestProcessor(AuthnRequestRepository authnRequestRepository,
+                                 PrincipalRepository principalRepository,
+                                 ResponseAssembler responseAssembler) {
         this.authnRequestRepository = authnRequestRepository;
         this.principalRepository = principalRepository;
+        this.responseAssembler = responseAssembler;
     }
 
     @EventListener
@@ -55,19 +60,22 @@ public class AuthnRequestProcessor {
                 .filter(authnRequestRepository::isAuthnRequestStoredForNameId)
                 // find the principal for this name ID
                 .flatMap(principalRepository::findByNameId)
+
                 // and send back authenticated
                 .map(principal -> authenticate(principal, authnRequestType))
                 // otherwise require the user interaction
                 .orElse(requireUserInteraction(authnRequestType))
+
+                // and call the resulting function on the
                 .accept(event.getServiceResponse());
     }
 
     private Consumer<ServiceResponse> authenticate(Principal principal, AuthnRequestType authnRequestType) {
         return serviceResponse -> {
-            // build response object
-            ServiceEventPublisher.getInstance().publish(new AuthenticatedResponsePrepared(
-                    serviceResponse,
-                    null));
+            ResponseType responseType = responseAssembler.toResponseType(principal, authnRequestType);
+
+            ServiceEventPublisher.getInstance()
+                    .publish(new AuthenticatedResponsePrepared(serviceResponse, responseType));
         };
     }
 

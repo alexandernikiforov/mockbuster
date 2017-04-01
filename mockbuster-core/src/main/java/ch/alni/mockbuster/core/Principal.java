@@ -26,12 +26,14 @@ import org.oasis.saml2.assertion.AttributeStatementType;
 public class Principal {
 
     private final String nameId;
+    private final String nameIdFormat;
     private final String displayRepresentation;
 
     private final AttributeStatementType attributeStatementType;
 
-    public Principal(String nameId, String displayRepresentation, AttributeStatementType attributeStatementType) {
+    public Principal(String nameId, String nameIdFormat, String displayRepresentation, AttributeStatementType attributeStatementType) {
         this.nameId = nameId;
+        this.nameIdFormat = nameIdFormat;
         this.displayRepresentation = displayRepresentation;
         this.attributeStatementType = attributeStatementType;
     }
@@ -46,5 +48,9 @@ public class Principal {
 
     public AttributeStatementType getAttributeStatementType() {
         return attributeStatementType;
+    }
+
+    public String getNameIdFormat() {
+        return nameIdFormat;
     }
 }

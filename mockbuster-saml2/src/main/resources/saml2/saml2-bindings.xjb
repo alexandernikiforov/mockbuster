@@ -16,37 +16,45 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<jxb:bindings version="2.1"
-              xmlns:jxb="http://java.sun.com/xml/ns/jaxb">
+<jxb:bindings xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              version="2.1">
 
-    <jxb:bindings scd="x-schema::saml" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+    <jxb:globalBindings>
+        <jxb:javaType name="java.time.Instant" xmlType="xs:dateTime"
+                      parseMethod="ch.alni.mockbuster.saml2.InstantAdapter.parseDateTime"
+                      printMethod="ch.alni.mockbuster.saml2.InstantAdapter.toDateTime"/>
+    </jxb:globalBindings>
+
+    <jxb:bindings scd="x-schema::saml">
         <jxb:schemaBindings>
             <jxb:package name="org.oasis.saml2.assertion"/>
         </jxb:schemaBindings>
     </jxb:bindings>
 
-    <jxb:bindings scd="x-schema::samlp" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+    <jxb:bindings scd="x-schema::samlp">
         <jxb:schemaBindings>
             <jxb:package name="org.oasis.saml2.protocol"/>
         </jxb:schemaBindings>
     </jxb:bindings>
 
-    <jxb:bindings scd="x-schema::md" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+    <jxb:bindings scd="x-schema::md">
         <jxb:schemaBindings>
             <jxb:package name="org.oasis.saml2.metadata"/>
         </jxb:schemaBindings>
     </jxb:bindings>
 
-    <jxb:bindings scd="x-schema::xenc" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#">
+    <jxb:bindings scd="x-schema::xenc">
         <jxb:schemaBindings>
             <jxb:package name="org.w3.xenc"/>
         </jxb:schemaBindings>
     </jxb:bindings>
 
-    <jxb:bindings scd="x-schema::ds" xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+    <jxb:bindings scd="x-schema::ds">
         <jxb:schemaBindings>
             <jxb:package name="org.w3.xmldsig.core"/>
         </jxb:schemaBindings>
     </jxb:bindings>
+
 
 </jxb:bindings>

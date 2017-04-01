@@ -59,7 +59,8 @@ public class InMemoryPrincipalRepositoryFactory implements PrincipalRepositoryFa
 
         List<Principal> principalList = PropertyNames.selectNames(databaseProperties.stringPropertyNames()).stream()
                 .map(propertyName -> new Principal(
-                        databaseProperties.getProperty(propertyName + ".id"),
+                        databaseProperties.getProperty(propertyName + ".name_id"),
+                        databaseProperties.getProperty(propertyName + ".name_id_format"),
                         databaseProperties.getProperty(propertyName + ".display_name"),
                         readAttributeStatementType(databaseProperties.getProperty(propertyName + ".attribute_statement"))
                 ))
