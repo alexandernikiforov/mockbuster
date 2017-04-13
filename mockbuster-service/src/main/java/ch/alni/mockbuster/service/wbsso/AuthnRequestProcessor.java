@@ -18,6 +18,7 @@
 
 package ch.alni.mockbuster.service.wbsso;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.oasis.saml2.assertion.NameIDType;
 import org.oasis.saml2.protocol.AuthnRequestType;
 import org.oasis.saml2.protocol.ResponseType;
@@ -55,43 +56,86 @@ public class AuthnRequestProcessor {
         AuthnRequestType authnRequestType = event.getSamlRequestType();
 
         findNameIDType(authnRequestType)
-                .map(NameIDType::getValue)
-                // is there an authn request already stored for this subject?
-                .filter(authnRequestRepository::isAuthnRequestStoredForNameId)
-                // find the principal for this name ID
-                .flatMap(principalRepository::findByNameId)
+                // the service provider supplied an identity
+                .map(identity -> withServiceResponseIfIdentityIsProvided(authnRequestType, identity))
 
-                // and send back authenticated
-                .map(principal -> authenticate(principal, authnRequestType))
-                // otherwise require the user interaction
-                .orElse(requireUserInteraction(authnRequestType))
+                .orElse(withServiceResponseIfIdentityIsMissing(authnRequestType))
 
-                // and call the resulting function on the
+                // and call the resulting function on the service response
                 .accept(event.getServiceResponse());
+    }
+
+    private Consumer<ServiceResponse> withServiceResponseIfIdentityIsProvided(AuthnRequestType authnRequestType,
+                                                                              NameIDType identity) {
+        final String nameId = identity.getValue();
+
+        return principalRepository.findByNameId(nameId)
+                // yes - authenticate
+                .map(principal -> authenticate(principal, authnRequestType))
+
+                // no - respond with an error
+                .orElse(sendError(authnRequestType));
+    }
+
+    private Consumer<ServiceResponse> withServiceResponseIfIdentityIsMissing(AuthnRequestType authnRequestType) {
+        final boolean allowCreate = Optional.ofNullable(authnRequestType.getNameIDPolicy())
+                .map(nameIDPolicyType -> BooleanUtils.isTrue(nameIDPolicyType.isAllowCreate()))
+                .orElse(false);
+
+        final boolean forceAuthn = BooleanUtils.isTrue(authnRequestType.isForceAuthn());
+
+        if (forceAuthn) {
+            return requireUserInteraction(authnRequestType);
+        } else if (allowCreate) {
+            // from session or let the user select
+            return authnRequestRepository.findPrincipal()
+                    .map(principal -> authenticate(principal, authnRequestType))
+                    .orElse(requireUserInteraction(authnRequestType));
+        } else {
+            // from session or deny
+            return authnRequestRepository.findPrincipal()
+                    .map(principal -> authenticate(principal, authnRequestType))
+                    .orElse(sendError(authnRequestType));
+        }
     }
 
     private Consumer<ServiceResponse> authenticate(Principal principal, AuthnRequestType authnRequestType) {
         return serviceResponse -> {
-            ResponseType responseType = responseAssembler.toResponseType(principal, authnRequestType);
+            ResponseType responseType = responseAssembler.toAuthenticatedResponseType(principal, authnRequestType);
 
             ServiceEventPublisher.getInstance()
                     .publish(new AuthenticatedResponsePrepared(serviceResponse, responseType));
         };
     }
 
+    private Consumer<ServiceResponse> sendError(AuthnRequestType authnRequestType) {
+        return serviceResponse -> {
+            ServiceEventPublisher.getInstance()
+                    .publish(new AuthnFailed(serviceResponse, authnRequestType));
+        };
+    }
+
+
     private Consumer<ServiceResponse> requireUserInteraction(AuthnRequestType authnRequestType) {
         return serviceResponse -> {
-            authnRequestRepository.storeAuthRequest(authnRequestType);
+            authnRequestRepository.storeAuthnRequest(authnRequestType);
+
             // stop processing and request the user interaction
             serviceResponse.sendUserInteractionRequired();
         };
     }
 
+    /**
+     * Finds the identity in the Subject element.
+     */
     private Optional<NameIDType> findNameIDType(AuthnRequestType authnRequestType) {
-        return authnRequestType.getSubject().getContent().stream()
-                .filter(jaxbElement -> jaxbElement.getValue() instanceof NameIDType)
-                .findFirst()
-                .map(jaxbElement -> ((NameIDType) jaxbElement.getValue()))
+        return Optional.ofNullable(authnRequestType.getSubject())
+                .map(subjectType -> subjectType.getContent()
+                        .stream()
+                        .filter(jaxbElement -> jaxbElement.getValue() instanceof NameIDType)
+                        .findFirst()
+                        .map(jaxbElement -> ((NameIDType) jaxbElement.getValue())))
+                .orElse(Optional.empty())
                 ;
     }
 

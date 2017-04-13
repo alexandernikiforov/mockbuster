@@ -24,13 +24,16 @@ import ch.alni.mockbuster.service.ServiceRequest;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 
-public class RequestSignatureCannotBeValidated implements ServiceEvent {
+/**
+ * The SAML responder or SAML authority is able to process the request but has chosen not to respond.
+ */
+public class RequestDenied implements ServiceEvent {
     private final ServiceRequest serviceRequest;
     private final ServiceResponse serviceResponse;
     private final RequestAbstractType requestAbstractType;
 
-    protected RequestSignatureCannotBeValidated(ServiceRequest serviceRequest, ServiceResponse serviceResponse,
-                                                RequestAbstractType requestAbstractType) {
+    protected RequestDenied(ServiceRequest serviceRequest, ServiceResponse serviceResponse,
+                            RequestAbstractType requestAbstractType) {
         this.serviceRequest = serviceRequest;
         this.serviceResponse = serviceResponse;
         this.requestAbstractType = requestAbstractType;

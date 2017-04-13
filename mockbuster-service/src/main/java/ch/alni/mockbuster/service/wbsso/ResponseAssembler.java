@@ -44,7 +44,7 @@ import ch.alni.mockbuster.core.Principal;
 import ch.alni.mockbuster.service.ServiceConfiguration;
 
 /**
- * Response assembler according to the rules of the Web SSO profile.
+ * Response assembler according to the rules of the Web Browser SSO profile.
  */
 @Component
 class ResponseAssembler {
@@ -58,9 +58,13 @@ class ResponseAssembler {
         this.serviceConfiguration = serviceConfiguration;
     }
 
-    ResponseType toResponseType(Principal principal, AuthnRequestType request) {
+    ResponseType toAuthenticatedResponseType(Principal principal, AuthnRequestType request) {
+
         final String requestId = request.getID();
-        final String responseIssuer = serviceConfiguration.getResponseIssuer();
+        final String responseIssuer = serviceConfiguration.getServiceId();
+
+        // this must be present according to the profile rules
+        final String requestIssuerId = request.getIssuer().getValue();
 
         final Instant now = Instant.now();
         final Instant deliveryNotOnOrAfter = now.plus(serviceConfiguration.getDeliveryValidityInSeconds(), ChronoUnit.SECONDS);
@@ -68,11 +72,13 @@ class ResponseAssembler {
         final Instant sessionNotOnOrAfter = serviceConfiguration.isSessionPermanent() ? null :
                 now.plus(serviceConfiguration.getSessionNotOnOrAfterInSeconds(), ChronoUnit.SECONDS);
 
+        final String assertionConsumerServiceUrl = request.getAssertionConsumerServiceURL();
+
         return ResponseType.builder()
                 .withID("_" + UUID.randomUUID().toString())
                 .withIssueInstant(now)
                 .withInResponseTo(requestId)
-                .withDestination(request.getAssertionConsumerServiceURL())
+                .withDestination(assertionConsumerServiceUrl)
                 .withVersion(SAML_VERSION)
 
                 // issuer
@@ -108,6 +114,7 @@ class ResponseAssembler {
                                                 .withSubjectConfirmationData(SubjectConfirmationDataType.builder()
                                                         .withNotBefore(now)
                                                         .withNotOnOrAfter(deliveryNotOnOrAfter)
+                                                        .withRecipient(assertionConsumerServiceUrl)
                                                         .withInResponseTo(requestId)
                                                         .build())
                                                 .build()))
@@ -115,7 +122,7 @@ class ResponseAssembler {
 
                         .withConditions(ConditionsType.builder()
                                 .addAudienceRestriction(AudienceRestrictionType.builder()
-                                        .withAudience(request.getAssertionConsumerServiceURL())
+                                        .withAudience(requestIssuerId)
                                         .build())
                                 .build())
 

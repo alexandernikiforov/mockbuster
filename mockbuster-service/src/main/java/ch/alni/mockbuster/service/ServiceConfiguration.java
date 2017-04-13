@@ -20,18 +20,18 @@ package ch.alni.mockbuster.service;
 
 public class ServiceConfiguration {
 
-    private final String responseIssuer;
+    private final String serviceId;
     private final long deliveryValidityInSeconds;
     private final long sessionNotOnOrAfterInSeconds;
 
-    public ServiceConfiguration(String responseIssuer, long deliveryValidityInSeconds, long sessionNotOnOrAfterInSeconds) {
-        this.responseIssuer = responseIssuer;
+    public ServiceConfiguration(String serviceId, long deliveryValidityInSeconds, long sessionNotOnOrAfterInSeconds) {
+        this.serviceId = serviceId;
         this.deliveryValidityInSeconds = deliveryValidityInSeconds;
         this.sessionNotOnOrAfterInSeconds = sessionNotOnOrAfterInSeconds;
     }
 
-    public String getResponseIssuer() {
-        return responseIssuer;
+    public String getServiceId() {
+        return serviceId;
     }
 
     public long getDeliveryValidityInSeconds() {

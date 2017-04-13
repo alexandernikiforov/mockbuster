@@ -16,22 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.wbsso;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+import org.oasis.saml2.protocol.ResponseType;
 
-import java.util.Optional;
+import ch.alni.mockbuster.service.ServiceResponse;
 
-import ch.alni.mockbuster.core.Principal;
+public class RequestDeniedResponsePrepared extends SamlResponsePrepared {
 
-public interface AuthnRequestRepository {
-
-    /**
-     * Checks if there has been already an authn request for the provided name ID.
-     */
-    Optional<Principal> findPrincipal();
-
-    Optional<AuthnRequestType> findStoredAuthnRequest();
-
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+    public RequestDeniedResponsePrepared(ServiceResponse serviceResponse, ResponseType responseType) {
+        super(serviceResponse, responseType);
+    }
 }

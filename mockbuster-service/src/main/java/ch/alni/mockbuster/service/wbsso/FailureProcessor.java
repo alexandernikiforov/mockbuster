@@ -18,6 +18,7 @@
 
 package ch.alni.mockbuster.service.wbsso;
 
+import org.oasis.saml2.protocol.AuthnRequestType;
 import org.oasis.saml2.protocol.RequestAbstractType;
 import org.oasis.saml2.protocol.ResponseType;
 import org.springframework.context.event.EventListener;
@@ -27,19 +28,28 @@ import ch.alni.mockbuster.service.events.ServiceEventPublisher;
 import ch.alni.mockbuster.service.response.CommonResponseBuilder;
 
 @Component
-public class InvalidRequestSignatureProcessor {
+public class FailureProcessor {
 
     @EventListener
-    public void onInvalidRequestSignature(RequestSignatureCannotBeValidated event) {
+    public void onRequestDenied(RequestDenied event) {
         RequestAbstractType requestAbstractType = event.getRequestAbstractType();
 
         // build response
         ResponseType responseType = new CommonResponseBuilder().build(requestAbstractType);
 
         ServiceEventPublisher.getInstance().publish(
-                new SamlResponsePrepared(
-                        event.getServiceResponse(),
-                        responseType
-                ));
+                new RequestDeniedResponsePrepared(event.getServiceResponse(), responseType));
     }
+
+    @EventListener
+    public void onAuthnFailed(AuthnFailed event) {
+        AuthnRequestType authnRequestType = event.getAuthnRequestType();
+
+        // build response
+        ResponseType responseType = new CommonResponseBuilder().build(authnRequestType);
+
+        ServiceEventPublisher.getInstance().publish(
+                new AuthnFailedResponsePrepared(event.getServiceResponse(), responseType));
+    }
+
 }

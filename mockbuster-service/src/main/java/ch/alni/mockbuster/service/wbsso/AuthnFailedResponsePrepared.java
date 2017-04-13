@@ -22,9 +22,9 @@ import org.oasis.saml2.protocol.ResponseType;
 
 import ch.alni.mockbuster.service.ServiceResponse;
 
-public class InvalidSignatureResponsePrepared extends SamlResponsePrepared {
+public class AuthnFailedResponsePrepared extends SamlResponsePrepared {
 
-    public InvalidSignatureResponsePrepared(ServiceResponse serviceResponse, ResponseType responseType) {
+    public AuthnFailedResponsePrepared(ServiceResponse serviceResponse, ResponseType responseType) {
         super(serviceResponse, responseType);
     }
 }

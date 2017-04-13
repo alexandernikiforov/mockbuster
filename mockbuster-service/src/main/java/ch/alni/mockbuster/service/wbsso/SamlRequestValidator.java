@@ -71,7 +71,7 @@ public class SamlRequestValidator {
                         event.getSamlRequestType()
                 ));
             } else {
-                ServiceEventPublisher.getInstance().publish(new RequestSignatureCannotBeValidated(
+                ServiceEventPublisher.getInstance().publish(new RequestDenied(
                         event.getServiceRequest(),
                         event.getServiceResponse(),
                         event.getSamlRequestType()));

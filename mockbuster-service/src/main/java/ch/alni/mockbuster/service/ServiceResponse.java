@@ -27,6 +27,8 @@ public interface ServiceResponse {
      */
     void sendRequestDenied(String encodedSamlResponse);
 
+    void sendAuthnFailed(String encodedSamlResponse);
+
     void sendAuthenticated(String encodedSamlResponse);
 
     void sendUserInteractionRequired();

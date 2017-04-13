@@ -16,22 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.wbsso;
 
 import org.oasis.saml2.protocol.AuthnRequestType;
 
-import java.util.Optional;
+import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.events.ServiceEvent;
 
-import ch.alni.mockbuster.core.Principal;
+/**
+ * The responding provider was unable to successfully authenticate the principal.
+ */
+public class AuthnFailed implements ServiceEvent {
+    private final ServiceResponse serviceResponse;
+    private final AuthnRequestType authnRequestType;
 
-public interface AuthnRequestRepository {
+    protected AuthnFailed(ServiceResponse serviceResponse, AuthnRequestType authnRequestType) {
+        this.serviceResponse = serviceResponse;
+        this.authnRequestType = authnRequestType;
+    }
 
-    /**
-     * Checks if there has been already an authn request for the provided name ID.
-     */
-    Optional<Principal> findPrincipal();
+    public ServiceResponse getServiceResponse() {
+        return serviceResponse;
+    }
 
-    Optional<AuthnRequestType> findStoredAuthnRequest();
-
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+    public AuthnRequestType getAuthnRequestType() {
+        return authnRequestType;
+    }
 }

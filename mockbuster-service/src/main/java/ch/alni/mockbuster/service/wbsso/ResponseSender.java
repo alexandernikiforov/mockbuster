@@ -49,18 +49,26 @@ public class ResponseSender {
     }
 
     @EventListener
-    public void onAuthenticated(LogoutResponsePrepared event) {
+    public void onAuthenticated(AuthenticatedResponsePrepared event) {
         String response = prepareResponse(event.getResponseType());
 
         event.getServiceResponse().sendAuthenticated(response);
     }
 
     @EventListener
-    public void onInvalidSignatureResponse(InvalidSignatureResponsePrepared event) {
+    public void onAuthnFailed(AuthnFailedResponsePrepared event) {
+        String response = prepareResponse(event.getResponseType());
+
+        event.getServiceResponse().sendAuthnFailed(response);
+    }
+
+    @EventListener
+    public void onRequestDeniedResponse(RequestDeniedResponsePrepared event) {
         String response = prepareResponse(event.getResponseType());
 
         event.getServiceResponse().sendRequestDenied(response);
     }
+
 
     private String prepareResponse(ResponseType responseType) {
         // to DOM
