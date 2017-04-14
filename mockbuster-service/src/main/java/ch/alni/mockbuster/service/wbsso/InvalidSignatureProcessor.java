@@ -18,41 +18,47 @@
 
 package ch.alni.mockbuster.service.wbsso;
 
+import org.oasis.saml2.protocol.AuthnRequestType;
 import org.oasis.saml2.protocol.LogoutRequestType;
+import org.oasis.saml2.protocol.ResponseType;
 import org.oasis.saml2.protocol.StatusResponseType;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
-import ch.alni.mockbuster.service.authentication.AuthnRequestRepository;
 import ch.alni.mockbuster.service.events.ServiceEventPublisher;
 
 @Component
-public class LogoutRequestProcessor {
-
-    private final AuthnRequestRepository authnRequestRepository;
+public class InvalidSignatureProcessor {
     private final ResponseAssembler responseAssembler;
 
     @Inject
-    public LogoutRequestProcessor(AuthnRequestRepository authnRequestRepository, ResponseAssembler responseAssembler) {
-        this.authnRequestRepository = authnRequestRepository;
+    public InvalidSignatureProcessor(ResponseAssembler responseAssembler) {
         this.responseAssembler = responseAssembler;
     }
 
     @EventListener
-    public void onLogoutRequestValidated(SamlRequestValidated<LogoutRequestType> event) {
-        LogoutRequestType logoutRequestType = event.getSamlRequestType();
-
-        // do logout (locally)
-        authnRequestRepository.removePrincipal();
-
-        // build response
-        StatusResponseType responseType = responseAssembler.toStatusResponse(logoutRequestType, SamlResponseStatus.SUCCESS);
+    public void onAuthnRequestInvalidSignature(InvalidSignature<AuthnRequestType> event) {
+        AuthnRequestType samlRequestType = event.getSamlRequestType();
+        ResponseType responseType = responseAssembler.toStatusResponse(samlRequestType, SamlResponseStatus.REQUEST_DENIED);
 
         ServiceEventPublisher.getInstance().publish(new SamlResponsePrepared<>(
                 event.getServiceResponse(),
-                logoutRequestType,
+                samlRequestType,
                 responseType));
     }
+
+    @EventListener
+    public void onLogoutRequestInvalidSignature(InvalidSignature<LogoutRequestType> event) {
+        LogoutRequestType samlRequestType = event.getSamlRequestType();
+        StatusResponseType responseType = responseAssembler.toStatusResponse(samlRequestType, SamlResponseStatus.REQUEST_DENIED);
+
+        ServiceEventPublisher.getInstance().publish(new SamlResponsePrepared<>(
+                event.getServiceResponse(),
+                samlRequestType,
+                responseType));
+    }
+
+
 }

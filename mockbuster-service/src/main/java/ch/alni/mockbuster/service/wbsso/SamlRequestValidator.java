@@ -71,10 +71,12 @@ public class SamlRequestValidator {
                         event.getSamlRequestType()
                 ));
             } else {
-                ServiceEventPublisher.getInstance().publish(new RequestDenied(
-                        event.getServiceRequest(),
-                        event.getServiceResponse(),
-                        event.getSamlRequestType()));
+                ServiceEventPublisher.getInstance()
+                        .publish(new InvalidSignature<>(
+                                event.getServiceRequest(),
+                                event.getServiceResponse(),
+                                event.getSamlRequestType()
+                        ));
             }
 
         } catch (SAXException e) {

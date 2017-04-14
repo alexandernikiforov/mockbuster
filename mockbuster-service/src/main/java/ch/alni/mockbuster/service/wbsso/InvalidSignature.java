@@ -24,30 +24,27 @@ import ch.alni.mockbuster.service.ServiceRequest;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 
-/**
- * The SAML responder or SAML authority is able to process the request but has chosen not to respond.
- */
-public class RequestDenied implements ServiceEvent {
+public class InvalidSignature<T extends RequestAbstractType> implements ServiceEvent {
+
     private final ServiceRequest serviceRequest;
     private final ServiceResponse serviceResponse;
-    private final RequestAbstractType requestAbstractType;
+    private final T samlRequestType;
 
-    protected RequestDenied(ServiceRequest serviceRequest, ServiceResponse serviceResponse,
-                            RequestAbstractType requestAbstractType) {
+    public InvalidSignature(ServiceRequest serviceRequest, ServiceResponse serviceResponse, T samlRequestType) {
         this.serviceRequest = serviceRequest;
         this.serviceResponse = serviceResponse;
-        this.requestAbstractType = requestAbstractType;
-    }
-
-    public ServiceRequest getServiceRequest() {
-        return serviceRequest;
+        this.samlRequestType = samlRequestType;
     }
 
     public ServiceResponse getServiceResponse() {
         return serviceResponse;
     }
 
-    public RequestAbstractType getRequestAbstractType() {
-        return requestAbstractType;
+    public T getSamlRequestType() {
+        return samlRequestType;
+    }
+
+    public ServiceRequest getServiceRequest() {
+        return serviceRequest;
     }
 }

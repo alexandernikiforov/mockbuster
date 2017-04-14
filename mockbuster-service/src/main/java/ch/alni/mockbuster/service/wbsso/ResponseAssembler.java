@@ -29,8 +29,10 @@ import org.oasis.saml2.assertion.SubjectConfirmationDataType;
 import org.oasis.saml2.assertion.SubjectConfirmationType;
 import org.oasis.saml2.assertion.SubjectType;
 import org.oasis.saml2.protocol.AuthnRequestType;
+import org.oasis.saml2.protocol.LogoutRequestType;
 import org.oasis.saml2.protocol.ResponseType;
 import org.oasis.saml2.protocol.StatusCodeType;
+import org.oasis.saml2.protocol.StatusResponseType;
 import org.oasis.saml2.protocol.StatusType;
 import org.springframework.stereotype.Component;
 
@@ -56,6 +58,58 @@ class ResponseAssembler {
     @Inject
     ResponseAssembler(ServiceConfiguration serviceConfiguration) {
         this.serviceConfiguration = serviceConfiguration;
+    }
+
+    ResponseType toStatusResponse(AuthnRequestType request, SamlResponseStatus responseStatus) {
+        final String requestId = request.getID();
+        final String responseIssuer = serviceConfiguration.getServiceId();
+        final Instant now = Instant.now();
+
+        return ResponseType.builder()
+                .withID("_" + UUID.randomUUID().toString())
+                .withIssueInstant(now)
+                .withInResponseTo(requestId)
+                .withVersion(SAML_VERSION)
+
+                // issuer
+                .withIssuer(NameIDType.builder()
+                        .withFormat("urn:oasis:names:tc:SAML:2.0:nameid-format:entity")
+                        .withValue(responseIssuer)
+                        .build())
+
+                // status
+                .withStatus(StatusType.builder()
+                        .withStatusCode(StatusCodeType.builder()
+                                .withValue(responseStatus.getValue())
+                                .build())
+                        .build())
+                .build();
+    }
+
+    StatusResponseType toStatusResponse(LogoutRequestType request, SamlResponseStatus responseStatus) {
+        final String requestId = request.getID();
+        final String responseIssuer = serviceConfiguration.getServiceId();
+        final Instant now = Instant.now();
+
+        return ResponseType.builder()
+                .withID("_" + UUID.randomUUID().toString())
+                .withIssueInstant(now)
+                .withInResponseTo(requestId)
+                .withVersion(SAML_VERSION)
+
+                // issuer
+                .withIssuer(NameIDType.builder()
+                        .withFormat("urn:oasis:names:tc:SAML:2.0:nameid-format:entity")
+                        .withValue(responseIssuer)
+                        .build())
+
+                // status
+                .withStatus(StatusType.builder()
+                        .withStatusCode(StatusCodeType.builder()
+                                .withValue(responseStatus.getValue())
+                                .build())
+                        .build())
+                .build();
     }
 
     ResponseType toAuthenticatedResponseType(Principal principal, AuthnRequestType request) {

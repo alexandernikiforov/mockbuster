@@ -32,6 +32,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import ch.alni.mockbuster.service.saml2.LogoutResponseMarshaller;
 import ch.alni.mockbuster.service.saml2.ResponseMarshaller;
 import ch.alni.mockbuster.service.saml2.Saml2CoreResourceResolver;
 import ch.alni.mockbuster.service.saml2.Saml2ObjectUnmarshaller;
@@ -75,5 +76,9 @@ public class ServiceConfig {
         return new ResponseMarshaller(jaxbContext(), schema());
     }
 
+    @Bean
+    public LogoutResponseMarshaller logoutResponseMarshaller() {
+        return new LogoutResponseMarshaller(jaxbContext(), schema());
+    }
 
 }

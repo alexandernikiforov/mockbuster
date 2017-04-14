@@ -16,15 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.wbsso;
+package ch.alni.mockbuster.service.saml2;
 
-import org.oasis.saml2.protocol.ResponseType;
+import org.oasis.saml2.protocol.StatusResponseType;
 
-import ch.alni.mockbuster.service.ServiceResponse;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.validation.Schema;
 
-public class AuthenticatedResponsePrepared extends SamlResponsePrepared {
+public class LogoutResponseMarshaller extends Saml2ObjectMarshaller<StatusResponseType> {
+    public LogoutResponseMarshaller(JAXBContext jaxbContext, Schema schema) {
+        super(jaxbContext, schema);
+    }
 
-    public AuthenticatedResponsePrepared(ServiceResponse serviceResponse, ResponseType responseType) {
-        super(serviceResponse, responseType);
+    @Override
+    protected JAXBElement<StatusResponseType> createJaxbElement(StatusResponseType samlObject) {
+        return getObjectFactory().createLogoutResponse(samlObject);
     }
 }

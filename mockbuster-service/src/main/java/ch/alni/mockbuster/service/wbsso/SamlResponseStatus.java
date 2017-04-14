@@ -18,13 +18,18 @@
 
 package ch.alni.mockbuster.service.wbsso;
 
-import org.oasis.saml2.protocol.ResponseType;
+public enum SamlResponseStatus {
+    REQUEST_DENIED("urn:oasis:names:tc:SAML:2.0:status:RequestDenied"),
+    AUTHN_FAILED("urn:oasis:names:tc:SAML:2.0:status:AuthnFailed"),
+    SUCCESS("urn:oasis:names:tc:SAML:2.0:status:Success");
 
-import ch.alni.mockbuster.service.ServiceResponse;
+    private final String value;
 
-public class LogoutResponsePrepared extends SamlResponsePrepared {
+    SamlResponseStatus(String value) {
+        this.value = value;
+    }
 
-    public LogoutResponsePrepared(ServiceResponse serviceResponse, ResponseType responseType) {
-        super(serviceResponse, responseType);
+    public String getValue() {
+        return value;
     }
 }

@@ -18,18 +18,21 @@
 
 package ch.alni.mockbuster.service.wbsso;
 
-import org.oasis.saml2.protocol.ResponseType;
+import org.oasis.saml2.protocol.RequestAbstractType;
+import org.oasis.saml2.protocol.StatusResponseType;
 
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 
-public class SamlResponsePrepared implements ServiceEvent {
+public class SamlResponsePrepared<T extends RequestAbstractType, R extends StatusResponseType> implements ServiceEvent {
 
     private final ServiceResponse serviceResponse;
-    private final ResponseType responseType;
+    private final T requestType;
+    private final R responseType;
 
-    public SamlResponsePrepared(ServiceResponse serviceResponse, ResponseType responseType) {
+    public SamlResponsePrepared(ServiceResponse serviceResponse, T requestType, R responseType) {
         this.serviceResponse = serviceResponse;
+        this.requestType = requestType;
         this.responseType = responseType;
     }
 
@@ -37,7 +40,11 @@ public class SamlResponsePrepared implements ServiceEvent {
         return serviceResponse;
     }
 
-    public ResponseType getResponseType() {
+    public R getResponseType() {
         return responseType;
+    }
+
+    public T getRequestType() {
+        return requestType;
     }
 }

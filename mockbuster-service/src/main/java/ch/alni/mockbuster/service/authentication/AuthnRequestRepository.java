@@ -26,10 +26,9 @@ import ch.alni.mockbuster.core.Principal;
 
 public interface AuthnRequestRepository {
 
-    /**
-     * Checks if there has been already an authn request for the provided name ID.
-     */
     Optional<Principal> findPrincipal();
+
+    void removePrincipal();
 
     Optional<AuthnRequestType> findStoredAuthnRequest();
 

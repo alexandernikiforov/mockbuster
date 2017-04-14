@@ -18,7 +18,10 @@
 
 package ch.alni.mockbuster.service.wbsso;
 
+import org.oasis.saml2.protocol.AuthnRequestType;
+import org.oasis.saml2.protocol.LogoutRequestType;
 import org.oasis.saml2.protocol.ResponseType;
+import org.oasis.saml2.protocol.StatusResponseType;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -27,6 +30,7 @@ import javax.inject.Inject;
 import javax.xml.transform.TransformerException;
 
 import ch.alni.mockbuster.service.dom.Documents;
+import ch.alni.mockbuster.service.saml2.LogoutResponseMarshaller;
 import ch.alni.mockbuster.service.saml2.ResponseMarshaller;
 import ch.alni.mockbuster.service.signature.SignatureService;
 
@@ -34,46 +38,36 @@ import ch.alni.mockbuster.service.signature.SignatureService;
 public class ResponseSender {
     private final SignatureService signatureService;
     private final ResponseMarshaller responseMarshaller;
+    private final LogoutResponseMarshaller logoutResponseMarshaller;
 
     @Inject
-    public ResponseSender(SignatureService signatureService, ResponseMarshaller responseMarshaller) {
+    public ResponseSender(SignatureService signatureService,
+                          ResponseMarshaller responseMarshaller,
+                          LogoutResponseMarshaller logoutResponseMarshaller) {
         this.signatureService = signatureService;
         this.responseMarshaller = responseMarshaller;
+        this.logoutResponseMarshaller = logoutResponseMarshaller;
     }
 
     @EventListener
-    public void onLogoutResponse(LogoutResponsePrepared event) {
-        String response = prepareResponse(event.getResponseType());
+    public void onLogoutResponse(SamlResponsePrepared<LogoutRequestType, StatusResponseType> event) {
+        Document document = logoutResponseMarshaller.objectToDocument(event.getResponseType());
 
-        event.getServiceResponse().sendAuthenticated(response);
+        String response = prepareResponse(document);
+
+        event.getServiceResponse().sendResponse(response);
     }
 
     @EventListener
-    public void onAuthenticated(AuthenticatedResponsePrepared event) {
-        String response = prepareResponse(event.getResponseType());
+    public void onAuthnResponse(SamlResponsePrepared<AuthnRequestType, ResponseType> event) {
+        Document document = responseMarshaller.objectToDocument(event.getResponseType());
 
-        event.getServiceResponse().sendAuthenticated(response);
+        String response = prepareResponse(document);
+
+        event.getServiceResponse().sendResponse(response);
     }
 
-    @EventListener
-    public void onAuthnFailed(AuthnFailedResponsePrepared event) {
-        String response = prepareResponse(event.getResponseType());
-
-        event.getServiceResponse().sendAuthnFailed(response);
-    }
-
-    @EventListener
-    public void onRequestDeniedResponse(RequestDeniedResponsePrepared event) {
-        String response = prepareResponse(event.getResponseType());
-
-        event.getServiceResponse().sendRequestDenied(response);
-    }
-
-
-    private String prepareResponse(ResponseType responseType) {
-        // to DOM
-        Document document = responseMarshaller.objectToDocument(responseType);
-
+    private String prepareResponse(Document document) {
         // signature
         signatureService.signResponseDocument(document);
 

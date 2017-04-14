@@ -22,18 +22,10 @@ package ch.alni.mockbuster.service;
  * Interface for the service response.
  */
 public interface ServiceResponse {
-    /**
-     * If the certificate cannot be validated.
-     */
-    void sendRequestDenied(String encodedSamlResponse);
-
-    void sendAuthnFailed(String encodedSamlResponse);
-
-    void sendAuthenticated(String encodedSamlResponse);
 
     void sendUserInteractionRequired();
 
-    void sendAttributes(String encodedSamlResponse);
+    void sendResponse(String encodedSamlResponse);
 
     void sendInvalidRequest();
 }

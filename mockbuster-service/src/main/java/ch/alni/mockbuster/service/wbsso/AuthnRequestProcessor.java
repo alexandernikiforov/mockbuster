@@ -74,7 +74,7 @@ public class AuthnRequestProcessor {
                 .map(principal -> authenticate(principal, authnRequestType))
 
                 // no - respond with an error
-                .orElse(sendError(authnRequestType));
+                .orElse(sendAuthnFailed(authnRequestType));
     }
 
     private Consumer<ServiceResponse> withServiceResponseIfIdentityIsMissing(AuthnRequestType authnRequestType) {
@@ -95,7 +95,7 @@ public class AuthnRequestProcessor {
             // from session or deny
             return authnRequestRepository.findPrincipal()
                     .map(principal -> authenticate(principal, authnRequestType))
-                    .orElse(sendError(authnRequestType));
+                    .orElse(sendAuthnFailed(authnRequestType));
         }
     }
 
@@ -103,15 +103,21 @@ public class AuthnRequestProcessor {
         return serviceResponse -> {
             ResponseType responseType = responseAssembler.toAuthenticatedResponseType(principal, authnRequestType);
 
-            ServiceEventPublisher.getInstance()
-                    .publish(new AuthenticatedResponsePrepared(serviceResponse, responseType));
+            ServiceEventPublisher.getInstance().publish(new SamlResponsePrepared<>(
+                    serviceResponse,
+                    authnRequestType,
+                    responseType));
         };
     }
 
-    private Consumer<ServiceResponse> sendError(AuthnRequestType authnRequestType) {
+    private Consumer<ServiceResponse> sendAuthnFailed(AuthnRequestType authnRequestType) {
         return serviceResponse -> {
-            ServiceEventPublisher.getInstance()
-                    .publish(new AuthnFailed(serviceResponse, authnRequestType));
+            ResponseType responseType = responseAssembler.toStatusResponse(authnRequestType, SamlResponseStatus.AUTHN_FAILED);
+
+            ServiceEventPublisher.getInstance().publish(new SamlResponsePrepared<>(
+                    serviceResponse,
+                    authnRequestType,
+                    responseType));
         };
     }
 
