@@ -25,7 +25,7 @@ public interface ServiceResponse {
 
     void sendUserInteractionRequired();
 
-    void sendResponse(String encodedSamlResponse);
+    void sendResponse(String destination, String encodedSamlResponse);
 
     void sendInvalidRequest();
 }

@@ -100,7 +100,7 @@ public class EnvelopedSignatureServiceTest {
 
         Document document = Documents.toDocument(request);
 
-        signatureService.sign(document, new AuthnRequestSignatureProperties(document));
+        signatureService.sign(document, new AuthnRequestSignatureProperties());
 
         String signedRequest = Documents.toString(document);
 

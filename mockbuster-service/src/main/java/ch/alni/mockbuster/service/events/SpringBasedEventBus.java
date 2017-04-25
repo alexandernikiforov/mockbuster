@@ -16,29 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.response;
+package ch.alni.mockbuster.service.events;
 
-import org.oasis.saml2.protocol.RequestAbstractType;
-import org.oasis.saml2.protocol.ResponseType;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 
-import java.time.Instant;
+public class SpringBasedEventBus implements EventBus, ApplicationEventPublisherAware {
+    private ApplicationEventPublisher applicationEventPublisher;
 
-/**
- * Fills out common information in a SAML 2.0 response.
- */
-public class CommonResponseBuilder {
+    @Override
+    public void publish(ServiceEvent serviceEvent) {
+        applicationEventPublisher.publishEvent(serviceEvent);
+    }
 
-    public static final String SAML_VERSION = "2.0";
-
-    public ResponseType build(RequestAbstractType request) {
-        String responseId = request.getID();
-
-        final ResponseType response = ResponseType.builder()
-                .withIssueInstant(Instant.now())
-                .withInResponseTo(responseId)
-                .withVersion(SAML_VERSION)
-                .build();
-
-        return response;
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 }

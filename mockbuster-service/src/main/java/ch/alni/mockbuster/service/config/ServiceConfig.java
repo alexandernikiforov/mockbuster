@@ -32,6 +32,9 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import ch.alni.mockbuster.service.events.EventBus;
+import ch.alni.mockbuster.service.events.ServiceEventPublisher;
+import ch.alni.mockbuster.service.events.SpringBasedEventBus;
 import ch.alni.mockbuster.service.saml2.LogoutResponseMarshaller;
 import ch.alni.mockbuster.service.saml2.ResponseMarshaller;
 import ch.alni.mockbuster.service.saml2.Saml2CoreResourceResolver;
@@ -43,6 +46,14 @@ import ch.alni.mockbuster.service.saml2.Saml2ObjectUnmarshaller;
 @Configuration
 @ComponentScan("ch.alni.mockbuster.service")
 public class ServiceConfig {
+
+    @Bean
+    public EventBus eventBus() {
+        SpringBasedEventBus springBasedEventBus = new SpringBasedEventBus();
+        ServiceEventPublisher.connect(springBasedEventBus);
+
+        return springBasedEventBus;
+    }
 
     JAXBContext jaxbContext() {
         try {

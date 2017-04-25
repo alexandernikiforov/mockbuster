@@ -19,10 +19,7 @@
 package ch.alni.mockbuster.service.dom;
 
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
@@ -33,8 +30,10 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 /**
  * Utility class to work with DOM and strings.
@@ -72,15 +71,16 @@ public final class Documents {
         }
     }
 
-    public static Document toDocument(String xml) throws SAXException, IOException {
-        DocumentBuilder documentBuilder = documentBuilderThreadLocal.get();
+    public static Document toDocument(String xml) throws TransformerException {
+        TransformerFactory transformerFactory = transformerFactoryLocal.get();
+        StreamSource source = new StreamSource(new StringReader(xml));
+        DOMResult result = new DOMResult(createNewDocument());
 
-        try {
-            return documentBuilder.parse(new InputSource(new StringReader(xml)));
-        } finally {
-            // important
-            documentBuilder.reset();
-        }
+        Transformer transformer = transformerFactory.newTransformer();
+        // pretty print
+        transformer.transform(source, result);
+
+        return (Document) result.getNode();
     }
 
     /**

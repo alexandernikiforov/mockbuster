@@ -72,7 +72,7 @@ public class EnvelopedSignatureService implements SignatureService {
                     xmlSignatureFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)
             );
 
-            Reference reference = xmlSignatureFactory.newReference(signatureProperties.getReferenceUri(),
+            Reference reference = xmlSignatureFactory.newReference(signatureProperties.getReferenceUri(document),
                     digestMethod, transformList, null, null);
 
             CanonicalizationMethod canonicalizationMethod = xmlSignatureFactory.newCanonicalizationMethod(
@@ -95,15 +95,15 @@ public class EnvelopedSignatureService implements SignatureService {
             X509Data x509Data = keyInfoFactory.newX509Data(signatureConfiguration.getSignatureValidatingCertPath());
             KeyInfo keyInfo = keyInfoFactory.newKeyInfo(Collections.singletonList(x509Data));
 
-            DOMSignContext signContext = signatureProperties.findNextSiblingNode()
+            DOMSignContext signContext = signatureProperties.findNextSiblingNode(document)
                     .map(nextSiblingNode -> new DOMSignContext(
                             signatureConfiguration.getSigningKey(),
-                            signatureProperties.getParentNode(),
+                            signatureProperties.getParentNode(document),
                             nextSiblingNode))
 
                     .orElse(new DOMSignContext(
                             signatureConfiguration.getSigningKey(),
-                            signatureProperties.getParentNode()));
+                            signatureProperties.getParentNode(document)));
 
             XMLSignature xmlSignature = xmlSignatureFactory.newXMLSignature(signedInfo, keyInfo);
             xmlSignature.sign(signContext);

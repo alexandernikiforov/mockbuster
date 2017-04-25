@@ -25,11 +25,9 @@ import org.slf4j.Logger;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
 
 import javax.inject.Inject;
+import javax.xml.transform.TransformerException;
 
 import ch.alni.mockbuster.service.dom.Documents;
 import ch.alni.mockbuster.service.events.ServiceEventPublisher;
@@ -79,11 +77,9 @@ public class SamlRequestValidator {
                         ));
             }
 
-        } catch (SAXException e) {
+        } catch (TransformerException e) {
             LOG.info("cannot parse incoming SAML request", e);
             event.getServiceResponse().sendInvalidRequest();
-        } catch (IOException e) {
-            throw new IllegalStateException("cannot read incoming SAML request", e);
         }
     }
 

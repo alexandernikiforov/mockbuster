@@ -51,20 +51,22 @@ public class ResponseSender {
 
     @EventListener
     public void onLogoutResponse(SamlResponsePrepared<LogoutRequestType, StatusResponseType> event) {
+        LogoutRequestType logoutRequestType = event.getRequestType();
         Document document = logoutResponseMarshaller.objectToDocument(event.getResponseType());
 
         String response = prepareResponse(document);
 
-        event.getServiceResponse().sendResponse(response);
+        event.getServiceResponse().sendResponse(null, response);
     }
 
     @EventListener
     public void onAuthnResponse(SamlResponsePrepared<AuthnRequestType, ResponseType> event) {
+        AuthnRequestType authnRequestType = event.getRequestType();
         Document document = responseMarshaller.objectToDocument(event.getResponseType());
 
         String response = prepareResponse(document);
 
-        event.getServiceResponse().sendResponse(response);
+        event.getServiceResponse().sendResponse(authnRequestType.getAssertionConsumerServiceURL(), response);
     }
 
     private String prepareResponse(Document document) {

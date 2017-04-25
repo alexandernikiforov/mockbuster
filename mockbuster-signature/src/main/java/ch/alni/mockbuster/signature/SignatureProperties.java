@@ -18,6 +18,7 @@
 
 package ch.alni.mockbuster.signature;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import java.util.Optional;
@@ -27,9 +28,9 @@ import java.util.Optional;
  */
 public interface SignatureProperties {
 
-    String getReferenceUri();
+    String getReferenceUri(Document document);
 
-    Node getParentNode();
+    Node getParentNode(Document document);
 
-    Optional<Node> findNextSiblingNode();
+    Optional<Node> findNextSiblingNode(Document document);
 }
