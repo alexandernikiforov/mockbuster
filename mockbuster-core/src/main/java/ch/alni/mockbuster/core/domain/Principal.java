@@ -16,20 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.core.domain;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+/**
+ * How to represent a principal.
+ */
+public class Principal {
 
-import java.util.Optional;
+    private final NameId nameId;
+    private final String attributeStatement;
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+    public Principal(NameId nameId, String attributeStatement) {
+        this.nameId = nameId;
+        this.attributeStatement = attributeStatement;
+    }
 
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    public NameId getNameId() {
+        return nameId;
+    }
+
+    public String getAttributeStatement() {
+        return attributeStatement;
+    }
 }

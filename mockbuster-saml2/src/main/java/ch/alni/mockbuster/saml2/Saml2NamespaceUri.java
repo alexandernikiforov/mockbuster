@@ -16,20 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.saml2;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
-
-import java.util.Optional;
-
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
-
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+/**
+ * SAML 2.0 namespace URIs.
+ */
+public interface Saml2NamespaceUri {
+    String SAML2_ASSERTION_NAMESPACE_URI = "urn:oasis:names:tc:SAML:2.0:assertion";
+    String SAML2_METADATA_NAMESPACE_URI = "urn:oasis:names:tc:SAML:2.0:metadata";
+    String SAML2_PROTOCOL_NAMESPACE_URI = "urn:oasis:names:tc:SAML:2.0:protocol";
+    String XENC_NAMESPACE_URI = "http://www.w3.org/2001/04/xmlenc#";
+    String XMLSIG_CORE_NAMESPACE_URI = "http://www.w3.org/2000/09/xmldsig#";
 }

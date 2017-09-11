@@ -16,20 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.signature.xpath;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+import javax.xml.namespace.QName;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import java.util.Optional;
+import static java.lang.String.format;
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+public final class XPaths {
 
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    private XPaths() {
+    }
+
+    public static String toAbsolutePath(QName... qNames) {
+        return Stream.of(qNames)
+                .map(XPaths::toLocalPath)
+                .map(value -> "/" + value)
+                .collect(Collectors.joining());
+    }
+
+    public static String toLocalPath(QName qName) {
+        return format("*[local-name()='%s' and namespace-uri()='%s']", qName.getLocalPart(), qName.getNamespaceURI());
+    }
+
 }

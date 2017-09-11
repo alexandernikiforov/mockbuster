@@ -18,6 +18,7 @@
 
 package ch.alni.mockbuster.web.controller;
 
+import ch.alni.mockbuster.service.MockbusterSsoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
@@ -27,20 +28,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.inject.Inject;
 
-import ch.alni.mockbuster.service.MockbusterService;
-import ch.alni.mockbuster.service.ServiceRequest;
-
 /**
  * Accepts requests from service providers. Implements SAML POST Bindng.
  */
 @Controller
 public class RedirectBindingController {
 
-    private final MockbusterService mockbusterService;
+    private final MockbusterSsoService mockbusterSsoService;
 
     @Inject
-    public RedirectBindingController(MockbusterService mockbusterService) {
-        this.mockbusterService = mockbusterService;
+    public RedirectBindingController(MockbusterSsoService mockbusterSsoService) {
+        this.mockbusterSsoService = mockbusterSsoService;
     }
 
     @RequestMapping(path = "/saml2/sso/post", method = RequestMethod.POST)
@@ -48,10 +46,7 @@ public class RedirectBindingController {
         final String encodedSamlRequest = formParameterMap.getFirst("SAMLRequest");
         final String relayStateToken = formParameterMap.getFirst("RelayState");
 
-        mockbusterService.authenticate(
-                new ServiceRequest(encodedSamlRequest, relayStateToken),
-
-                );
+        mockbusterSsoService.authenticate(encodedSamlRequest, null);
         return ResponseEntity.ok().build();
     }
 

@@ -18,14 +18,29 @@
 
 package ch.alni.mockbuster.signature;
 
-import org.w3c.dom.Node;
-
-import java.util.Optional;
-
 /**
  * Strategy to find the signature in the document.
  */
-public interface SignatureLocation {
+public class SignatureLocation {
 
-    Optional<Node> findSignatureNode();
+    private final String pathToParentNode;
+    private final String pathToNextSiblingNode;
+
+    public SignatureLocation(String pathToParentNode, String pathToNextSiblingNode) {
+        this.pathToParentNode = pathToParentNode;
+        this.pathToNextSiblingNode = pathToNextSiblingNode;
+    }
+
+    public SignatureLocation(String pathToParentNode) {
+        this.pathToParentNode = pathToParentNode;
+        this.pathToNextSiblingNode = null;
+    }
+
+    public String getPathToParentNode() {
+        return pathToParentNode;
+    }
+
+    public String getPathToNextSiblingNode() {
+        return pathToNextSiblingNode;
+    }
 }

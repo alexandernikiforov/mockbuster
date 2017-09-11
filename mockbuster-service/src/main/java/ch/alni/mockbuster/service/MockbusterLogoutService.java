@@ -16,20 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+/**
+ * Entry point for the Mockbuster logout service.
+ */
+public interface MockbusterLogoutService {
 
-import java.util.Optional;
-
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
-
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    void logout(String serviceRequest, ServiceResponse serviceResponse);
 }

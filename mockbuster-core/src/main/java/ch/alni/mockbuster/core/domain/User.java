@@ -16,20 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.core.domain;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+import java.util.UUID;
 
-import java.util.Optional;
+/**
+ * Predefined role.
+ */
+public class User {
+    private final String id;
+    private final String displayRepresentation;
+    private final String attributeStatement;
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+    public User(String displayRepresentation, String attributeStatement) {
+        this.id = UUID.randomUUID().toString();
+        this.displayRepresentation = displayRepresentation;
+        this.attributeStatement = attributeStatement;
+    }
 
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    public String getId() {
+        return id;
+    }
+
+    public String getDisplayRepresentation() {
+        return displayRepresentation;
+    }
+
+    public String getAttributeStatement() {
+        return attributeStatement;
+    }
 }

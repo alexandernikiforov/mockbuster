@@ -16,20 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.core.repository;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+import org.junit.Test;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.HashSet;
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+import static org.assertj.core.api.Assertions.assertThat;
 
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+public class PropertyNamesTest {
+    @Test
+    public void selectNames() throws Exception {
+        assertThat(PropertyNames.selectNames(new HashSet<>(Arrays.asList(
+                "user.1.id",
+                "user.1.display_name",
+                "user.2.id",
+                "user.2.display_name"
+        )))).containsOnly("user.1", "user.2");
+    }
+
 }

@@ -18,9 +18,6 @@
 
 package ch.alni.mockbuster.service.events;
 
-/**
- * TODO: javadoc
- */
 public interface EventBus {
 
     void publish(ServiceEvent serviceEvent);

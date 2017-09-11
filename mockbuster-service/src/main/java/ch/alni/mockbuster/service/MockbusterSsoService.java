@@ -16,20 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
-
-import java.util.Optional;
-
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+/**
+ * Entry point for the Mockbuster single sign-on service.
+ */
+public interface MockbusterSsoService {
 
     /**
-     * Tries to find the stored AuthnRequest.
+     * Authenticates the user.
      */
-    Optional<AuthnRequestType> findAuthnRequest();
+    void authenticate(String serviceRequest, ServiceResponse serviceResponse);
 }

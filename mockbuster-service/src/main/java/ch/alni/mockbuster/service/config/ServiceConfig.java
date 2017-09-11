@@ -18,27 +18,24 @@
 
 package ch.alni.mockbuster.service.config;
 
-import org.oasis.saml2.protocol.ObjectFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.xml.sax.SAXException;
-
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-
+import ch.alni.mockbuster.service.ServiceConfiguration;
 import ch.alni.mockbuster.service.events.EventBus;
 import ch.alni.mockbuster.service.events.ServiceEventPublisher;
 import ch.alni.mockbuster.service.events.SpringBasedEventBus;
-import ch.alni.mockbuster.service.saml2.LogoutResponseMarshaller;
-import ch.alni.mockbuster.service.saml2.ResponseMarshaller;
-import ch.alni.mockbuster.service.saml2.Saml2CoreResourceResolver;
-import ch.alni.mockbuster.service.saml2.Saml2ObjectUnmarshaller;
+import ch.alni.mockbuster.signature.SignatureConfiguration;
+import ch.alni.mockbuster.signature.enveloped.EnvelopedSignatureValidator;
+import ch.alni.mockbuster.signature.enveloped.EnvelopedSigner;
+import ch.alni.mockbuster.signature.pkix.X509CertListBasedKeyFinder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+import javax.xml.crypto.dsig.DigestMethod;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Configuration for the Spring container.
@@ -46,6 +43,15 @@ import ch.alni.mockbuster.service.saml2.Saml2ObjectUnmarshaller;
 @Configuration
 @ComponentScan("ch.alni.mockbuster.service")
 public class ServiceConfig {
+
+    @Value("${mockbuster.config.service_id}")
+    private String serviceId;
+
+    @Value("${mockbuster.config.delivery_validity_in_seconds:60}")
+    private long deliveryValidityInSeconds;
+
+    @Value("${mockbuster.config.session_not_on_or_after_in_seconds:-1}")
+    private long sessionNotOnOrAfterInSeconds;
 
     @Bean
     public EventBus eventBus() {
@@ -55,41 +61,41 @@ public class ServiceConfig {
         return springBasedEventBus;
     }
 
-    JAXBContext jaxbContext() {
-        try {
-            return JAXBContext.newInstance(ObjectFactory.class);
-        } catch (JAXBException e) {
-            throw new IllegalStateException("cannot create JAXB context", e);
-        }
-    }
-
-    Schema schema() {
-        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        schemaFactory.setResourceResolver(new Saml2CoreResourceResolver());
-
-        try {
-            return schemaFactory.newSchema(new Source[]{
-                            new StreamSource(getClass().getResourceAsStream("/saml2/saml-schema-protocol-2.0.xsd"))
-                    }
-            );
-        } catch (SAXException e) {
-            throw new IllegalStateException("cannot create schema for SAML2 validation", e);
-        }
+    @Bean
+    public ServiceConfiguration serviceConfiguration() {
+        return new ServiceConfiguration(serviceId, deliveryValidityInSeconds, sessionNotOnOrAfterInSeconds);
     }
 
     @Bean
-    public Saml2ObjectUnmarshaller saml2ObjectUnmarshaller() {
-        return new Saml2ObjectUnmarshaller(jaxbContext(), schema());
+    public EnvelopedSigner envelopedSigner() {
+        return new EnvelopedSigner(new SignatureConfiguration() {
+
+            @Override
+            public List<X509Certificate> getSignatureValidatingCertPath() {
+                return null;
+            }
+
+            @Override
+            public PrivateKey getSigningKey() {
+                return null;
+            }
+
+            @Override
+            public String getSignatureMethodUri() {
+                return "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+            }
+
+            @Override
+            public String getDigestMethodUri() {
+                return DigestMethod.SHA256;
+            }
+        });
     }
 
     @Bean
-    public ResponseMarshaller responseMarshaller() {
-        return new ResponseMarshaller(jaxbContext(), schema());
+    public EnvelopedSignatureValidator envelopedSignatureValidator() {
+        return new EnvelopedSignatureValidator(new X509CertListBasedKeyFinder(
+                Collections::emptyList
+        ));
     }
-
-    @Bean
-    public LogoutResponseMarshaller logoutResponseMarshaller() {
-        return new LogoutResponseMarshaller(jaxbContext(), schema());
-    }
-
 }

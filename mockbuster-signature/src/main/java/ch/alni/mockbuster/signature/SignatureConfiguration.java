@@ -16,20 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.signature;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
-import java.util.Optional;
+/**
+ * Describes the service signature configuration.
+ */
+public interface SignatureConfiguration {
 
-public interface AuthnRequestRepository {
     /**
-     * Stores the latest AuthnRequest.
+     * Returns the certificate chain to validate the signatures of the Mockbuster service. The first
+     * certificate in the resulting list is the chain root.
      */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+    List<X509Certificate> getSignatureValidatingCertPath();
 
     /**
-     * Tries to find the stored AuthnRequest.
+     * Returns the signing key for the signatures made by the Mockbuster service.
      */
-    Optional<AuthnRequestType> findAuthnRequest();
+    PrivateKey getSigningKey();
+
+    /**
+     * Which signature do we want.
+     */
+    String getSignatureMethodUri();
+
+    /**
+     * Which digest do we want.
+     */
+    String getDigestMethodUri();
 }

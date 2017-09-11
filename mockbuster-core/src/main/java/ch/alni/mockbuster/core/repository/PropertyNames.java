@@ -16,20 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.core.repository;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import java.util.Optional;
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+final class PropertyNames {
+    private final static Pattern namePattern = Pattern.compile("^(user\\.\\w+)\\.\\w+$");
 
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    private PropertyNames() {
+    }
+
+    static Set<String> selectNames(Set<String> propertyNames) {
+        return propertyNames.stream()
+                .map(namePattern::matcher)
+                .filter(Matcher::matches)
+                .map(matcher -> matcher.group(1))
+                .collect(Collectors.toSet());
+    }
 }

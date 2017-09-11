@@ -85,6 +85,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>ch.alni</groupId>
+            <artifactId>mockbuster-signature</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

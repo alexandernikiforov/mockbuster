@@ -1,5 +1,7 @@
 package ch.alni.mockbuster.web.controller;
 
+import ch.alni.mockbuster.service.MockbusterSsoService;
+import ch.alni.mockbuster.service.profile.logout.LocalLogoutService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
@@ -9,20 +11,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.inject.Inject;
 
-import ch.alni.mockbuster.service.MockbusterService;
-import ch.alni.mockbuster.service.ServiceRequest;
-
 /**
  * Accepts requests from service providers. Implements SAML POST Bindng.
  */
 @Controller
 public class PostBindingController {
 
-    private final MockbusterService mockbusterService;
+    private final MockbusterSsoService mockbusterSsoService;
+    private final LocalLogoutService localLogoutService;
 
     @Inject
-    public PostBindingController(MockbusterService mockbusterService) {
-        this.mockbusterService = mockbusterService;
+    public PostBindingController(MockbusterSsoService mockbusterSsoService, LocalLogoutService localLogoutService) {
+        this.mockbusterSsoService = mockbusterSsoService;
+        this.localLogoutService = localLogoutService;
     }
 
     @RequestMapping(path = "/saml2/sso/post", method = RequestMethod.POST)
@@ -30,10 +31,8 @@ public class PostBindingController {
         final String encodedSamlRequest = formParameterMap.getFirst("SAMLRequest");
         final String relayStateToken = formParameterMap.getFirst("RelayState");
 
-        mockbusterService.authenticate(
-                new ServiceRequest(encodedSamlRequest, relayStateToken), null
+        mockbusterSsoService.authenticate(encodedSamlRequest, null);
 
-        );
         return ResponseEntity.ok().build();
     }
 

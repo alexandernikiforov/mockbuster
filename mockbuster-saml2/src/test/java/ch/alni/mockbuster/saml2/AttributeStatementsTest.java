@@ -16,20 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.saml2;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+import org.junit.Test;
+import org.oasis.saml2.assertion.AttributeStatementType;
 
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+public class AttributeStatementsTest {
 
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    @Test
+    public void toAttributeStatementType() throws Exception {
+        AttributeStatementType attributeStatementType =
+                AttributeStatements.toAttributeStatementType(getClass().getResourceAsStream("/user.xml"));
+
+        assertThat(attributeStatementType).isNotNull();
+    }
+
 }

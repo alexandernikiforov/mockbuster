@@ -16,20 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.profile.common;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+public enum SamlResponseStatus {
+    REQUEST_DENIED("urn:oasis:names:tc:SAML:2.0:status:RequestDenied"),
+    AUTHN_FAILED("urn:oasis:names:tc:SAML:2.0:status:AuthnFailed"),
+    SUCCESS("urn:oasis:names:tc:SAML:2.0:status:Success"),
+    UNKNOWN_PRINCIPAL("urn:oasis:names:tc:SAML:2.0:status:UnknownPrincipal");
 
-import java.util.Optional;
+    private final String value;
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+    SamlResponseStatus(String value) {
+        this.value = value;
+    }
 
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    public String getValue() {
+        return value;
+    }
 }

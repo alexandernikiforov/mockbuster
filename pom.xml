@@ -8,7 +8,6 @@
 
     <modules>
         <module>mockbuster-service</module>
-        <module>mockbuster-service-adapter</module>
         <module>mockbuster-signature</module>
         <module>mockbuster-saml2</module>
         <module>mockbuster-core</module>

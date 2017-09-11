@@ -16,20 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.signature.xpath;
 
-import org.oasis.saml2.protocol.AuthnRequestType;
+import org.apache.commons.lang.StringUtils;
+import org.w3c.dom.Element;
 
-import java.util.Optional;
+public final class ReferenceUris {
+    private ReferenceUris() {
+    }
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
-
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    public static String getReferenceUri(Element element) {
+        final String idValue = element.getAttribute("ID");
+        if (StringUtils.isEmpty(idValue)) {
+            return "";
+        } else {
+            // otherwise the ID attribute is not of type Id :-(
+            element.setIdAttribute("ID", true);
+            return "#" + idValue;
+        }
+    }
 }

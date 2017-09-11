@@ -16,20 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.AuthnRequestType;
 
-import java.util.Optional;
+public class AuthnRequestIncorrectlySigned implements ServiceEvent {
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+    private final AuthnRequestType authnRequestType;
+    private final ServiceResponse serviceResponse;
 
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    public AuthnRequestIncorrectlySigned(AuthnRequestType authnRequestType, ServiceResponse serviceResponse) {
+        this.authnRequestType = authnRequestType;
+        this.serviceResponse = serviceResponse;
+    }
+
+    public AuthnRequestType getAuthnRequestType() {
+        return authnRequestType;
+    }
+
+    public ServiceResponse getServiceResponse() {
+        return serviceResponse;
+    }
 }
