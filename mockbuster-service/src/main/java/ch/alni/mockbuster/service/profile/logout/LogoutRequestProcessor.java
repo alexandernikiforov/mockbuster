@@ -51,7 +51,7 @@ public class LogoutRequestProcessor {
     }
 
     @EventListener
-    public void onLogoutRequestIncorrectlySigned(LogoutRequestIncorrectlySigned event) {
+    public void onLogoutRequestDenied(LogoutRequestDenied event) {
         LogoutRequestType logoutRequestType = event.getLogoutRequestType();
         ServiceResponse serviceResponse = event.getServiceResponse();
 

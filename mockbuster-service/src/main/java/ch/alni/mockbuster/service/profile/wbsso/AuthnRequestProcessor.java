@@ -79,7 +79,7 @@ public class AuthnRequestProcessor {
     }
 
     @EventListener
-    public void onAuthnRequestInvalidSignature(AuthnRequestIncorrectlySigned event) {
+    public void onAuthnRequestDenied(AuthnRequestDenied event) {
         AuthnRequestType authnRequestType = event.getAuthnRequestType();
         ServiceResponse serviceResponse = event.getServiceResponse();
 

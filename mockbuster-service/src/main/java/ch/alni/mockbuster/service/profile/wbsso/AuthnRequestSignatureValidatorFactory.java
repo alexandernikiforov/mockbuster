@@ -16,31 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.profile.logout;
+package ch.alni.mockbuster.service.profile.wbsso;
 
 
 import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
-import ch.alni.mockbuster.signature.SignatureValidationResult;
-import ch.alni.mockbuster.signature.enveloped.EnvelopedSignatureValidator;
+import ch.alni.mockbuster.service.profile.common.SamlRequestSignatureValidator;
 import ch.alni.mockbuster.signature.xpath.XPaths;
-import org.w3c.dom.Document;
 
 import javax.xml.namespace.QName;
 
-public class LogoutRequestSignatureValidator {
+final class AuthnRequestSignatureValidatorFactory {
     private final static String SIGNATURE_PATH = XPaths.toAbsolutePath(
-            new QName(Saml2NamespaceUri.SAML2_PROTOCOL_NAMESPACE_URI, "LogoutRequest"),
+            new QName(Saml2NamespaceUri.SAML2_PROTOCOL_NAMESPACE_URI, "AuthnRequest"),
             new QName(Saml2NamespaceUri.XMLSIG_CORE_NAMESPACE_URI, "Signature")
     );
-    private final EnvelopedSignatureValidator validator;
 
-    public LogoutRequestSignatureValidator(EnvelopedSignatureValidator validator) {
-        this.validator = validator;
+    private AuthnRequestSignatureValidatorFactory() {
     }
 
-    public boolean validateSignature(Document document) {
-        SignatureValidationResult result = validator.validateXmlSignature(document, SIGNATURE_PATH);
-
-        return result.hasPassedCoreValidation();
+    static SamlRequestSignatureValidator make() {
+        return new SamlRequestSignatureValidator(SIGNATURE_PATH);
     }
 }

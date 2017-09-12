@@ -22,12 +22,12 @@ import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.AuthnRequestType;
 
-public class AuthnRequestIncorrectlySigned implements ServiceEvent {
+public class AuthnRequestDenied implements ServiceEvent {
 
     private final AuthnRequestType authnRequestType;
     private final ServiceResponse serviceResponse;
 
-    public AuthnRequestIncorrectlySigned(AuthnRequestType authnRequestType, ServiceResponse serviceResponse) {
+    public AuthnRequestDenied(AuthnRequestType authnRequestType, ServiceResponse serviceResponse) {
         this.authnRequestType = authnRequestType;
         this.serviceResponse = serviceResponse;
     }

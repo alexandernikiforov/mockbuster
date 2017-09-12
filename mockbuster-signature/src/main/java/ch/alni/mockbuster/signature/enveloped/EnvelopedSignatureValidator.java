@@ -46,27 +46,24 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class EnvelopedSignatureValidator {
     private static final Logger LOG = getLogger(EnvelopedSignatureValidator.class);
 
-    private final Function<KeyInfo, Optional<Key>> keyFinder;
-
-    public EnvelopedSignatureValidator(Function<KeyInfo, Optional<Key>> keyFinder) {
-        this.keyFinder = keyFinder;
-    }
-
     /**
      * Validates signature in the given element.
      *
      * @param document               document to validate the signature in
      * @param pathToSignatureElement absolute XPath to the signature element
+     * @param keyFinder              how to map keyInfo to the validating key
      * @return true if the signature is valid or false otherwise
      */
-    public SignatureValidationResult validateXmlSignature(Document document, String pathToSignatureElement) {
+    public SignatureValidationResult validateXmlSignature(Document document,
+                                                          String pathToSignatureElement,
+                                                          Function<KeyInfo, Optional<Key>> keyFinder) {
         return NodeFinder.findNode(document, pathToSignatureElement)
-                .map(this::validateSignatureNode)
+                .map(signatureNode -> validateSignatureNode(signatureNode, keyFinder))
                 .orElseGet(SignatureValidationResultFactory::makeNotFound);
     }
 
-    private SignatureValidationResult validateSignatureNode(Node signatureNode) {
-        KeySelector keySelector = getKeySelector();
+    private SignatureValidationResult validateSignatureNode(Node signatureNode, Function<KeyInfo, Optional<Key>> keyFinder) {
+        KeySelector keySelector = getKeySelector(keyFinder);
 
         DOMValidateContext validateContext = new DOMValidateContext(keySelector, signatureNode);
 
@@ -115,7 +112,7 @@ public class EnvelopedSignatureValidator {
         return result;
     }
 
-    private KeySelector getKeySelector() {
+    private KeySelector getKeySelector(Function<KeyInfo, Optional<Key>> keyFinder) {
         return new KeySelector() {
             @Override
             public KeySelectorResult select(KeyInfo keyInfo, Purpose purpose, AlgorithmMethod method, XMLCryptoContext context) throws KeySelectorException {

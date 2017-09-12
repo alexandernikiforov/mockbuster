@@ -23,9 +23,7 @@ import ch.alni.mockbuster.service.events.EventBus;
 import ch.alni.mockbuster.service.events.ServiceEventPublisher;
 import ch.alni.mockbuster.service.events.SpringBasedEventBus;
 import ch.alni.mockbuster.signature.SignatureConfiguration;
-import ch.alni.mockbuster.signature.enveloped.EnvelopedSignatureValidator;
 import ch.alni.mockbuster.signature.enveloped.EnvelopedSigner;
-import ch.alni.mockbuster.signature.pkix.X509CertListBasedKeyFinder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -34,7 +32,6 @@ import org.springframework.context.annotation.Configuration;
 import javax.xml.crypto.dsig.DigestMethod;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -92,10 +89,4 @@ public class ServiceConfig {
         });
     }
 
-    @Bean
-    public EnvelopedSignatureValidator envelopedSignatureValidator() {
-        return new EnvelopedSignatureValidator(new X509CertListBasedKeyFinder(
-                Collections::emptyList
-        ));
-    }
 }

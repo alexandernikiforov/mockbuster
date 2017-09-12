@@ -16,35 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.core.domain;
+package ch.alni.mockbuster.service.profile.common;
 
-import java.util.UUID;
+import org.oasis.saml2.assertion.NameIDType;
+import org.oasis.saml2.protocol.RequestAbstractType;
 
-public class IdentityProvider {
-    private String id;
+import java.util.Optional;
 
-    private String entityId;
-
-    private boolean wantAuthnRequestsSigned;
-
-    public IdentityProvider() {
-        id = UUID.randomUUID().toString();
+public final class SamlRequests {
+    private SamlRequests() {
     }
 
-    public IdentityProvider(String entityId, boolean wantAuthnRequestsSigned) {
-        this.entityId = entityId;
-        this.wantAuthnRequestsSigned = wantAuthnRequestsSigned;
+    public static Optional<String> findIssuerId(RequestAbstractType requestAbstractType) {
+        return Optional.ofNullable(requestAbstractType.getIssuer())
+                .map(NameIDType::getValue);
     }
 
-    public String getId() {
-        return id;
-    }
 
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public boolean isWantAuthnRequestsSigned() {
-        return wantAuthnRequestsSigned;
-    }
 }

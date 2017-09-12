@@ -45,7 +45,8 @@ public class EnvelopedSignerTest {
     private static final Logger LOG = getLogger(EnvelopedSignerTest.class);
 
     private EnvelopedSigner envelopedSigner;
-    private EnvelopedSignatureValidator envelopedSignatureValidator;
+    private EnvelopedSignatureValidator envelopedSignatureValidator = new EnvelopedSignatureValidator();
+    private X509CertListBasedKeyFinder keyFinder;
 
     @Before
     public void setUp() throws Exception {
@@ -81,16 +82,14 @@ public class EnvelopedSignerTest {
         envelopedSigner = new EnvelopedSigner(signatureConfiguration);
 
         List<X509Certificate> certificateList = Collections.singletonList(testCert);
+        keyFinder = new X509CertListBasedKeyFinder(() -> certificateList);
 
         // validate against the same certificate as while signing
-        envelopedSignatureValidator = new EnvelopedSignatureValidator(new X509CertListBasedKeyFinder(() ->
-                certificateList
-        ));
-
+        envelopedSignatureValidator = new EnvelopedSignatureValidator();
     }
 
     @Test
-    public void sign() throws Exception {
+    public void testSign() throws Exception {
         String request = IOUtils.toString(getClass().getResourceAsStream("/authn_request.xml"), "UTF-8");
 
         Document document = Documents.toDocument(request);
@@ -113,9 +112,71 @@ public class EnvelopedSignerTest {
         SignatureValidationResult result = envelopedSignatureValidator.validateXmlSignature(document,
                 XPaths.toAbsolutePath(
                         new QName("urn:oasis:names:tc:SAML:2.0:protocol", "AuthnRequest"),
-                        new QName("http://www.w3.org/2000/09/xmldsig#", "Signature")));
+                        new QName("http://www.w3.org/2000/09/xmldsig#", "Signature")),
+                keyFinder);
 
+        assertThat(result.isSignatureFound()).isTrue();
         assertThat(result.hasPassedCoreValidation()).isTrue();
+        assertThat(result.getInvalidReferences()).isEmpty();
     }
+
+    @Test
+    public void testSignTempered() throws Exception {
+        String request = IOUtils.toString(getClass().getResourceAsStream("/authn_request.xml"), "UTF-8");
+
+        Document document = Documents.toDocument(request);
+
+        envelopedSigner.sign(document,
+                XPaths.toAbsolutePath(new QName("urn:oasis:names:tc:SAML:2.0:protocol", "AuthnRequest")),
+                new SignatureLocation(
+                        XPaths.toAbsolutePath(new QName("urn:oasis:names:tc:SAML:2.0:protocol", "AuthnRequest")),
+                        XPaths.toAbsolutePath(
+                                new QName("urn:oasis:names:tc:SAML:2.0:protocol", "AuthnRequest"),
+                                new QName("urn:oasis:names:tc:SAML:2.0:assertion", "Issuer"))
+                                + "/following-sibling::*[position() = 1]"
+                )
+        );
+
+        // add an attribute to the document
+        document.getDocumentElement().setAttribute("hello", "world");
+
+        String signedRequest = Documents.toString(document);
+
+        LOG.info(signedRequest);
+
+        SignatureValidationResult result = envelopedSignatureValidator.validateXmlSignature(document,
+                XPaths.toAbsolutePath(
+                        new QName("urn:oasis:names:tc:SAML:2.0:protocol", "AuthnRequest"),
+                        new QName("http://www.w3.org/2000/09/xmldsig#", "Signature")),
+                keyFinder);
+
+        assertThat(result.isSignatureFound()).isTrue();
+        assertThat(result.hasPassedCoreValidation()).isFalse();
+        assertThat(result.hasValidSignatureValue()).isTrue();
+        assertThat(result.getInvalidReferences()).hasSize(1);
+    }
+
+    @Test
+    public void testUnsigned() throws Exception {
+        String request = IOUtils.toString(getClass().getResourceAsStream("/authn_request.xml"), "UTF-8");
+
+        Document document = Documents.toDocument(request);
+
+        String unsignedRequest = Documents.toString(document);
+
+        LOG.info(unsignedRequest);
+
+        SignatureValidationResult result = envelopedSignatureValidator.validateXmlSignature(document,
+                XPaths.toAbsolutePath(
+                        new QName("urn:oasis:names:tc:SAML:2.0:protocol", "AuthnRequest"),
+                        new QName("http://www.w3.org/2000/09/xmldsig#", "Signature")),
+                keyFinder);
+
+        assertThat(result.hasPassedCoreValidation()).isFalse();
+        assertThat(result.hasValidSignatureValue()).isFalse();
+        assertThat(result.isSignatureFound()).isFalse();
+        assertThat(result.getInvalidReferences()).isEmpty();
+    }
+
 
 }

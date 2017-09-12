@@ -21,5 +21,5 @@ package ch.alni.mockbuster.core.domain;
 import java.util.Optional;
 
 public interface ServiceProviderRepository {
-    Optional<ServiceProvider> findByEntityId();
+    Optional<ServiceProvider> findByEntityId(String entityId);
 }

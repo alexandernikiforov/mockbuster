@@ -27,12 +27,12 @@ import org.oasis.saml2.protocol.AuthnRequestType;
 import javax.xml.namespace.QName;
 import java.util.Optional;
 
-public final class AuthnRequests {
+final class AuthnRequests {
 
     private AuthnRequests() {
     }
 
-    public static Optional<NameId> getSubjectIdentity(AuthnRequestType authnRequestType) {
+    static Optional<NameId> getSubjectIdentity(AuthnRequestType authnRequestType) {
         return Optional.ofNullable(authnRequestType.getSubject())
                 .flatMap(AuthnRequests::findNameIDType)
                 .map(nameIDType -> new NameId(nameIDType.getFormat(), nameIDType.getValue()));

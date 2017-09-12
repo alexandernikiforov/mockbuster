@@ -18,18 +18,25 @@
 
 package ch.alni.mockbuster.service.profile.logout;
 
+import ch.alni.mockbuster.core.domain.ServiceProvider;
+import ch.alni.mockbuster.core.domain.ServiceProviderRepository;
 import ch.alni.mockbuster.saml2.Saml2ProtocolObjects;
 import ch.alni.mockbuster.service.MockbusterLogoutService;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
-import ch.alni.mockbuster.signature.enveloped.EnvelopedSignatureValidator;
+import ch.alni.mockbuster.service.profile.common.SamlRequestSignatureValidator;
+import ch.alni.mockbuster.service.profile.common.SamlRequests;
+import ch.alni.mockbuster.signature.pkix.X509Certificates;
 import org.oasis.saml2.protocol.LogoutRequestType;
+import org.oasis.saml2.protocol.ObjectFactory;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 
 import javax.inject.Inject;
 import javax.xml.bind.JAXBException;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -38,12 +45,15 @@ public class LocalLogoutService implements MockbusterLogoutService {
     private static final Logger LOG = getLogger(LocalLogoutService.class);
 
     private final EventBus eventBus;
-    private final LogoutRequestSignatureValidator logoutRequestSignatureValidator;
+    private final ServiceProviderRepository serviceProviderRepository;
+
+    private final SamlRequestSignatureValidator signatureValidator = LogoutRequestSignatureValidatorFactory.make();
+    private final ObjectFactory objectFactory = new ObjectFactory();
 
     @Inject
-    public LocalLogoutService(EventBus eventBus, EnvelopedSignatureValidator envelopedSignatureValidator) {
+    public LocalLogoutService(EventBus eventBus, ServiceProviderRepository serviceProviderRepository) {
         this.eventBus = eventBus;
-        logoutRequestSignatureValidator = new LogoutRequestSignatureValidator(envelopedSignatureValidator);
+        this.serviceProviderRepository = serviceProviderRepository;
     }
 
     @Override
@@ -51,12 +61,24 @@ public class LocalLogoutService implements MockbusterLogoutService {
         try {
             LogoutRequestType logoutRequestType = Saml2ProtocolObjects.unmarshal(serviceRequest, LogoutRequestType.class);
 
-            Document document = Saml2ProtocolObjects.jaxbElementToDocument(logoutRequestType);
+            ServiceProvider serviceProvider = SamlRequests.findIssuerId(logoutRequestType)
+                    .flatMap(serviceProviderRepository::findByEntityId)
+                    .orElse(null);
 
-            if (logoutRequestSignatureValidator.validateSignature(document)) {
-                eventBus.publish(new LogoutRequestReceived(logoutRequestType, serviceResponse));
+            if (null != serviceProvider) {
+                Document document = Saml2ProtocolObjects.jaxbElementToDocument(
+                        objectFactory.createLogoutRequest(logoutRequestType)
+                );
+
+                List<X509Certificate> certificateList = X509Certificates.gatherCertificates(serviceProvider.getCertificates());
+
+                if (signatureValidator.validateSignature(document, certificateList, true)) {
+                    eventBus.publish(new LogoutRequestReceived(logoutRequestType, serviceResponse));
+                } else {
+                    eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse));
+                }
             } else {
-                eventBus.publish(new LogoutRequestIncorrectlySigned(logoutRequestType, serviceResponse));
+                eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse));
             }
 
         } catch (JAXBException e) {

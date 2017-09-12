@@ -16,35 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.core.domain;
+package ch.alni.mockbuster.signature;
 
-import java.util.UUID;
+/**
+ * Functions with SignatureValidationResult.
+ */
+public final class SignatureValidationResults {
 
-public class IdentityProvider {
-    private String id;
-
-    private String entityId;
-
-    private boolean wantAuthnRequestsSigned;
-
-    public IdentityProvider() {
-        id = UUID.randomUUID().toString();
+    private SignatureValidationResults() {
     }
 
-    public IdentityProvider(String entityId, boolean wantAuthnRequestsSigned) {
-        this.entityId = entityId;
-        this.wantAuthnRequestsSigned = wantAuthnRequestsSigned;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public boolean isWantAuthnRequestsSigned() {
-        return wantAuthnRequestsSigned;
+    public static boolean isSignatureValid(SignatureValidationResult result, boolean signatureRequired) {
+        if (result.hasPassedCoreValidation()) {
+            // if validation is passed, then ok
+            return true;
+        } else if (result.isSignatureFound()) {
+            // otherwise false if there is a signature
+            return false;
+        } else {
+            // if there is no signature, check if the signature is required
+            return !signatureRequired;
+        }
     }
 }

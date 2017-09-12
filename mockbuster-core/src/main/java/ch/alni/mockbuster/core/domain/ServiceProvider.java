@@ -19,6 +19,7 @@
 package ch.alni.mockbuster.core.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -34,6 +35,8 @@ public class ServiceProvider {
     private boolean wantAssertionSigned;
 
     private List<AssertionConsumerService> assertionConsumerServiceList = new ArrayList<>();
+
+    private List<String> certificateList = new ArrayList<>();
 
     public ServiceProvider() {
         id = UUID.randomUUID().toString();
@@ -61,6 +64,10 @@ public class ServiceProvider {
 
     public Stream<AssertionConsumerService> getAssertionConsumerServices() {
         return assertionConsumerServiceList.stream();
+    }
+
+    public List<String> getCertificates() {
+        return Collections.unmodifiableList(certificateList);
     }
 
     public boolean isWantAssertionSigned() {

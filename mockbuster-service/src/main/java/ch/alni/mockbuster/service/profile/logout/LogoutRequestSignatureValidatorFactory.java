@@ -18,25 +18,23 @@
 
 package ch.alni.mockbuster.service.profile.logout;
 
-import ch.alni.mockbuster.service.ServiceResponse;
-import ch.alni.mockbuster.service.events.ServiceEvent;
-import org.oasis.saml2.protocol.LogoutRequestType;
 
-public class LogoutRequestIncorrectlySigned implements ServiceEvent {
+import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
+import ch.alni.mockbuster.service.profile.common.SamlRequestSignatureValidator;
+import ch.alni.mockbuster.signature.xpath.XPaths;
 
-    private final LogoutRequestType logoutRequestType;
-    private final ServiceResponse serviceResponse;
+import javax.xml.namespace.QName;
 
-    public LogoutRequestIncorrectlySigned(LogoutRequestType logoutRequestType, ServiceResponse serviceResponse) {
-        this.logoutRequestType = logoutRequestType;
-        this.serviceResponse = serviceResponse;
+class LogoutRequestSignatureValidatorFactory {
+    private final static String SIGNATURE_PATH = XPaths.toAbsolutePath(
+            new QName(Saml2NamespaceUri.SAML2_PROTOCOL_NAMESPACE_URI, "LogoutRequest"),
+            new QName(Saml2NamespaceUri.XMLSIG_CORE_NAMESPACE_URI, "Signature")
+    );
+
+    private LogoutRequestSignatureValidatorFactory() {
     }
 
-    public LogoutRequestType getLogoutRequestType() {
-        return logoutRequestType;
-    }
-
-    public ServiceResponse getServiceResponse() {
-        return serviceResponse;
+    static SamlRequestSignatureValidator make() {
+        return new SamlRequestSignatureValidator(SIGNATURE_PATH);
     }
 }

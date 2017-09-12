@@ -18,17 +18,27 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.core.domain.IdentityProvider;
+import ch.alni.mockbuster.core.domain.IdentityProviderRepository;
+import ch.alni.mockbuster.core.domain.ServiceProvider;
+import ch.alni.mockbuster.core.domain.ServiceProviderRepository;
 import ch.alni.mockbuster.saml2.Saml2ProtocolObjects;
 import ch.alni.mockbuster.service.MockbusterSsoService;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
-import ch.alni.mockbuster.signature.enveloped.EnvelopedSignatureValidator;
+import ch.alni.mockbuster.service.profile.common.SamlRequestSignatureValidator;
+import ch.alni.mockbuster.service.profile.common.SamlRequests;
+import ch.alni.mockbuster.signature.pkix.X509Certificates;
 import org.oasis.saml2.protocol.AuthnRequestType;
+import org.oasis.saml2.protocol.ObjectFactory;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
 
 import javax.inject.Inject;
 import javax.xml.bind.JAXBException;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -36,28 +46,54 @@ import static org.slf4j.LoggerFactory.getLogger;
 class WebBrowserSsoService implements MockbusterSsoService {
     private static final Logger LOG = getLogger(WebBrowserSsoService.class);
 
+    private final ObjectFactory objectFactory = new ObjectFactory();
+    private final SamlRequestSignatureValidator signatureValidator = AuthnRequestSignatureValidatorFactory.make();
+
     private final EventBus eventBus;
-    private final AuthnRequestSignatureValidator authnRequestSignatureValidator;
+    private final ServiceProviderRepository serviceProviderRepository;
+    private final IdentityProviderRepository identityProviderRepository;
 
     @Inject
-    WebBrowserSsoService(EventBus eventBus, EnvelopedSignatureValidator envelopedSignatureValidator) {
+    WebBrowserSsoService(EventBus eventBus,
+                         ServiceProviderRepository serviceProviderRepository,
+                         IdentityProviderRepository identityProviderRepository) {
         this.eventBus = eventBus;
-        this.authnRequestSignatureValidator = new AuthnRequestSignatureValidator(envelopedSignatureValidator);
+        this.serviceProviderRepository = serviceProviderRepository;
+        this.identityProviderRepository = identityProviderRepository;
     }
 
     @Override
     public void authenticate(String serviceRequest, ServiceResponse serviceResponse) {
+        LOG.info("a new AuthnRequest received");
         try {
             AuthnRequestType authnRequestType = Saml2ProtocolObjects.unmarshal(serviceRequest, AuthnRequestType.class);
 
-            if (authnRequestSignatureValidator.validateSignature(authnRequestType)) {
-                eventBus.publish(new AuthnRequestReceived(authnRequestType, serviceResponse));
+            ServiceProvider serviceProvider = SamlRequests.findIssuerId(authnRequestType)
+                    .flatMap(serviceProviderRepository::findByEntityId)
+                    .orElse(null);
+
+            IdentityProvider identityProvider = identityProviderRepository.getIdentityProvider();
+
+            if (null != serviceProvider) {
+                Document document = Saml2ProtocolObjects.jaxbElementToDocument(
+                        objectFactory.createAuthnRequest(authnRequestType)
+                );
+
+                List<X509Certificate> certificateList = X509Certificates.gatherCertificates(serviceProvider.getCertificates());
+
+                if (signatureValidator.validateSignature(document, certificateList, identityProvider.isWantAuthnRequestsSigned())) {
+                    eventBus.publish(new AuthnRequestReceived(authnRequestType, serviceResponse));
+                } else {
+                    LOG.info("invalid or non existing signature; AuthnRequest {} will be denied", authnRequestType.getID());
+                    eventBus.publish(new AuthnRequestDenied(authnRequestType, serviceResponse));
+                }
             } else {
-                eventBus.publish(new AuthnRequestIncorrectlySigned(authnRequestType, serviceResponse));
+                LOG.info("service provider not found or unknown; AuthnRequest {} will be denied", authnRequestType.getID());
+                eventBus.publish(new AuthnRequestDenied(authnRequestType, serviceResponse));
             }
 
         } catch (JAXBException e) {
-            LOG.info("cannot parse the authentication request", e);
+            LOG.info("cannot parse AuthnRequest", e);
             serviceResponse.sendInvalidRequest();
         }
     }

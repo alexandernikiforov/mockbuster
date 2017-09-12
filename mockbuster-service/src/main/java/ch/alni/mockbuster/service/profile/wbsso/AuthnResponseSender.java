@@ -21,6 +21,7 @@ package ch.alni.mockbuster.service.profile.wbsso;
 import ch.alni.mockbuster.saml2.Saml2ProtocolObjects;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.signature.enveloped.EnvelopedSigner;
+import org.oasis.saml2.protocol.ObjectFactory;
 import org.oasis.saml2.protocol.ResponseType;
 import org.slf4j.Logger;
 import org.springframework.context.event.EventListener;
@@ -36,6 +37,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class AuthnResponseSender {
     private static final Logger LOG = getLogger(AuthnResponseSender.class);
     private final ResponseSigner responseSigner;
+    private final ObjectFactory objectFactory = new ObjectFactory();
 
     @Inject
     public AuthnResponseSender(EnvelopedSigner envelopedSigner) {
@@ -48,7 +50,9 @@ public class AuthnResponseSender {
         ServiceResponse serviceResponse = event.getServiceResponse();
 
         try {
-            Document document = Saml2ProtocolObjects.jaxbElementToDocument(responseType);
+            Document document = Saml2ProtocolObjects.jaxbElementToDocument(
+                    objectFactory.createResponse(responseType)
+            );
 
             responseSigner.signResponse(document);
 
