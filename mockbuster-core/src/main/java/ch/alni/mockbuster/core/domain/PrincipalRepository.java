@@ -27,7 +27,4 @@ public interface PrincipalRepository {
 
     List<Principal> findAll();
 
-    void save(Principal principal);
-
-    boolean removePrincipal(Principal principal);
 }

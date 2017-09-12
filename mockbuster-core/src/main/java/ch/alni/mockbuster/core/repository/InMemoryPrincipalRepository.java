@@ -18,32 +18,34 @@
 
 package ch.alni.mockbuster.core.repository;
 
-import ch.alni.mockbuster.core.domain.User;
-import ch.alni.mockbuster.core.domain.UserRepository;
+import ch.alni.mockbuster.core.domain.NameId;
+import ch.alni.mockbuster.core.domain.Principal;
+import ch.alni.mockbuster.core.domain.PrincipalRepository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * In-memory principal repository.
  */
-public class InMemoryUserRepository implements UserRepository {
-    private final Map<String, User> userMap = new HashMap<>();
+public class InMemoryPrincipalRepository implements PrincipalRepository {
+    private final Map<NameId, Principal> principalMap = new HashMap<>();
 
-    public InMemoryUserRepository(List<User> userList) {
-        userMap.putAll(userList.stream().collect(Collectors.toMap(User::getId, Function.identity())));
+    public InMemoryPrincipalRepository(List<Principal> principalList) {
+        principalMap.putAll(principalList.stream().collect(Collectors.toMap(Principal::getNameId, Function.identity())));
     }
 
     @Override
-    public User getById(String id) {
-        return userMap.get(id);
+    public Optional<Principal> findByNameId(NameId nameId) {
+        return Optional.ofNullable(principalMap.get(nameId));
     }
 
     @Override
-    public List<User> findAll() {
-        return userMap.values().stream().collect(Collectors.toList());
+    public List<Principal> findAll() {
+        return principalMap.values().stream().collect(Collectors.toList());
     }
 }

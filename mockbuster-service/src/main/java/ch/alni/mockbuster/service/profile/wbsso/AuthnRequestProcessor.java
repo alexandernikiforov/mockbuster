@@ -20,9 +20,10 @@ package ch.alni.mockbuster.service.profile.wbsso;
 
 import ch.alni.mockbuster.core.domain.Principal;
 import ch.alni.mockbuster.service.ServiceResponse;
-import ch.alni.mockbuster.service.authentication.AuthnRequestRepository;
 import ch.alni.mockbuster.service.events.EventBus;
 import ch.alni.mockbuster.service.profile.common.SamlResponseStatus;
+import ch.alni.mockbuster.service.session.Session;
+import ch.alni.mockbuster.service.session.SessionRepository;
 import org.oasis.saml2.protocol.AuthnRequestType;
 import org.oasis.saml2.protocol.ResponseType;
 import org.slf4j.Logger;
@@ -38,14 +39,14 @@ public class AuthnRequestProcessor {
     private static final Logger LOG = getLogger(AuthnRequestProcessor.class);
 
     private final ResponseFactory responseFactory;
-    private final AuthnRequestRepository authnRequestRepository;
+    private final SessionRepository sessionRepository;
     private final EventBus eventBus;
 
     @Inject
     public AuthnRequestProcessor(ResponseFactory responseFactory,
-                                 AuthnRequestRepository authnRequestRepository,
+                                 SessionRepository sessionRepository,
                                  EventBus eventBus) {
-        this.authnRequestRepository = authnRequestRepository;
+        this.sessionRepository = sessionRepository;
         this.eventBus = eventBus;
         this.responseFactory = responseFactory;
     }
@@ -56,10 +57,25 @@ public class AuthnRequestProcessor {
         ServiceResponse serviceResponse = event.getServiceResponse();
         Principal principal = event.getPrincipal();
 
+        Session currentSession = sessionRepository.getCurrentSession();
+        currentSession.storeIdentity(principal);
+
         // create the response
-        ResponseType responseType = responseFactory.makeResponse(authnRequest, principal);
+        ResponseType responseType = responseFactory.makeResponse(authnRequest, principal, currentSession);
 
         eventBus.publish(new AuthnResponsePrepared(responseType, serviceResponse));
+    }
+
+    @EventListener
+    public void onPrincipalAuthenticationRequired(PrincipalAuthenticationRequired event) {
+        AuthnRequestType authnRequestType = event.getAuthnRequest();
+        ServiceResponse serviceResponse = event.getServiceResponse();
+        Principal principal = event.getPrincipal();
+
+        Session currentSession = sessionRepository.getCurrentSession();
+        currentSession.storeAuthnRequestWithPrincipal(authnRequestType, principal);
+
+        serviceResponse.sendUserInteractionRequired();
     }
 
     @EventListener
@@ -73,11 +89,11 @@ public class AuthnRequestProcessor {
     }
 
     @EventListener
-    public void onAuthnRequestFailed(AuthnRequestFailed event) {
+    public void onPrincipalNotFound(PrincipalNotFound event) {
         AuthnRequestType authnRequestType = event.getAuthnRequestType();
         ServiceResponse serviceResponse = event.getServiceResponse();
 
-        ResponseType responseType = responseFactory.makeResponse(authnRequestType, SamlResponseStatus.AUTHN_FAILED);
+        ResponseType responseType = responseFactory.makeResponse(authnRequestType, SamlResponseStatus.UNKNOWN_PRINCIPAL);
 
         eventBus.publish(new AuthnResponsePrepared(responseType, serviceResponse));
     }
@@ -87,7 +103,8 @@ public class AuthnRequestProcessor {
         AuthnRequestType authnRequestType = event.getAuthnRequestType();
         ServiceResponse serviceResponse = event.getServiceResponse();
 
-        authnRequestRepository.storeAuthnRequest(authnRequestType);
+        Session currentSession = sessionRepository.getCurrentSession();
+        currentSession.storeAuthnRequest(authnRequestType);
 
         serviceResponse.sendUserInteractionRequired();
     }

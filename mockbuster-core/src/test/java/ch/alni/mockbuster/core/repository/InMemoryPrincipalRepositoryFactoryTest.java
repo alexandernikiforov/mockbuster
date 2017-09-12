@@ -18,7 +18,7 @@
 
 package ch.alni.mockbuster.core.repository;
 
-import ch.alni.mockbuster.core.domain.UserRepository;
+import ch.alni.mockbuster.core.domain.PrincipalRepository;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,21 +26,21 @@ import java.io.File;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InMemoryUserRepositoryFactoryTest {
-    private InMemoryUserRepositoryFactory factory;
+public class InMemoryPrincipalRepositoryFactoryTest {
+    private InMemoryPrincipalRepositoryFactory factory;
 
     @Before
     public void setUp() throws Exception {
         File baseDir = new File(getClass().getResource("/database/database.properties").getFile()).getParentFile();
 
-        factory = new InMemoryUserRepositoryFactory(baseDir, "database.properties");
+        factory = new InMemoryPrincipalRepositoryFactory(baseDir, "database.properties");
     }
 
     @Test
     public void create() throws Exception {
-        UserRepository userRepository = factory.create();
+        PrincipalRepository principalRepository = factory.create();
 
-        assertThat(userRepository.findAll()).hasSize(2);
+        assertThat(principalRepository.findAll()).hasSize(2);
     }
 
 }

@@ -16,12 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.core.domain;
+package ch.alni.mockbuster.service.session;
 
-import java.util.List;
+import ch.alni.mockbuster.core.domain.Principal;
+import org.oasis.saml2.protocol.AuthnRequestType;
 
-public interface UserRepository {
-    List<User> findAll();
+import java.util.Optional;
 
-    User getById(String id);
+public interface Session {
+
+    String getIndex();
+
+    /**
+     * Stores the latest AuthnRequest.
+     */
+    void storeAuthnRequest(AuthnRequestType authnRequestType);
+
+    void storeAuthnRequestWithPrincipal(AuthnRequestType authnRequestType, Principal principal);
+
+    /**
+     * Tries to find the stored AuthnRequest.
+     */
+    Optional<AuthnRequestType> findStoredAuthnRequest();
+
+    Optional<Principal> findStoredPrincipal();
+
+    void storeIdentity(Principal principal);
+
+    Optional<Principal> findIdentity();
+
+    void clearIdentity();
+
 }

@@ -16,20 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.authentication;
+package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.AuthnRequestType;
 
-import java.util.Optional;
+/**
+ * Is triggered when a authn request fails.
+ */
+public class PrincipalNotFound implements ServiceEvent {
+    private final AuthnRequestType authnRequest;
+    private final ServiceResponse serviceResponse;
 
-public interface AuthnRequestRepository {
-    /**
-     * Stores the latest AuthnRequest.
-     */
-    void storeAuthnRequest(AuthnRequestType authnRequestType);
+    public PrincipalNotFound(AuthnRequestType authnRequest, ServiceResponse serviceResponse) {
+        this.authnRequest = authnRequest;
+        this.serviceResponse = serviceResponse;
+    }
 
-    /**
-     * Tries to find the stored AuthnRequest.
-     */
-    Optional<AuthnRequestType> findAuthnRequest();
+    public AuthnRequestType getAuthnRequestType() {
+        return authnRequest;
+    }
+
+    public ServiceResponse getServiceResponse() {
+        return serviceResponse;
+    }
 }

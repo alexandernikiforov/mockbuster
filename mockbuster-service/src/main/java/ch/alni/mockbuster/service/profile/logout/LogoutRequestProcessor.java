@@ -20,11 +20,12 @@ package ch.alni.mockbuster.service.profile.logout;
 
 
 import ch.alni.mockbuster.core.domain.Principal;
-import ch.alni.mockbuster.core.domain.PrincipalRepository;
 import ch.alni.mockbuster.service.ServiceConfiguration;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
 import ch.alni.mockbuster.service.profile.common.SamlResponseStatus;
+import ch.alni.mockbuster.service.session.Session;
+import ch.alni.mockbuster.service.session.SessionRepository;
 import org.oasis.saml2.protocol.LogoutRequestType;
 import org.oasis.saml2.protocol.StatusResponseType;
 import org.springframework.context.event.EventListener;
@@ -37,14 +38,14 @@ public class LogoutRequestProcessor {
 
     private final EventBus eventBus;
     private final LogoutResponseFactory logoutResponseFactory;
-    private final PrincipalRepository principalRepository;
+    private final SessionRepository sessionRepository;
 
     @Inject
     public LogoutRequestProcessor(EventBus eventBus,
                                   ServiceConfiguration serviceConfiguration,
-                                  PrincipalRepository principalRepository) {
+                                  SessionRepository sessionRepository) {
         this.eventBus = eventBus;
-        this.principalRepository = principalRepository;
+        this.sessionRepository = sessionRepository;
 
         logoutResponseFactory = new LogoutResponseFactory(serviceConfiguration);
     }
@@ -66,7 +67,7 @@ public class LogoutRequestProcessor {
         ServiceResponse serviceResponse = event.getServiceResponse();
         Principal principal = event.getPrincipal();
 
-        principalRepository.removePrincipal(principal);
+        sessionRepository.findAllSessionsForPrincipal(principal.getNameId()).forEach(Session::clearIdentity);
 
         StatusResponseType statusResponseType = logoutResponseFactory.makeStatusResponse(logoutRequestType,
                 SamlResponseStatus.SUCCESS);

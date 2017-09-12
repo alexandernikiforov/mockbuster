@@ -38,10 +38,6 @@ public final class AuthnRequests {
                 .map(nameIDType -> new NameId(nameIDType.getFormat(), nameIDType.getValue()));
     }
 
-    public static boolean isAllowCreate(AuthnRequestType authnRequestType) {
-        return true;
-    }
-
     private static Optional<NameIDType> findNameIDType(SubjectType subjectType) {
         return subjectType.getContent().stream()
                 .filter(jaxbElement -> jaxbElement.getName()

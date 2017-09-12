@@ -16,33 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.core.domain;
+package ch.alni.mockbuster.service.session;
 
-import java.util.UUID;
+import ch.alni.mockbuster.core.domain.NameId;
 
-/**
- * Predefined role.
- */
-public class User {
-    private final String id;
-    private final String displayRepresentation;
-    private final String attributeStatement;
+import java.util.List;
+import java.util.Optional;
 
-    public User(String displayRepresentation, String attributeStatement) {
-        this.id = UUID.randomUUID().toString();
-        this.displayRepresentation = displayRepresentation;
-        this.attributeStatement = attributeStatement;
-    }
+public interface SessionRepository {
 
-    public String getId() {
-        return id;
-    }
+    Session getCurrentSession();
 
-    public String getDisplayRepresentation() {
-        return displayRepresentation;
-    }
+    Optional<Session> findSessionByIndex(String index);
 
-    public String getAttributeStatement() {
-        return attributeStatement;
-    }
+    List<Session> findAllSessionsForPrincipal(NameId nameId);
 }

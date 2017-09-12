@@ -22,6 +22,7 @@ import ch.alni.mockbuster.core.domain.Principal;
 import ch.alni.mockbuster.saml2.AttributeStatements;
 import ch.alni.mockbuster.service.ServiceConfiguration;
 import ch.alni.mockbuster.service.profile.common.SamlResponseStatus;
+import ch.alni.mockbuster.service.session.Session;
 import org.oasis.saml2.assertion.*;
 import org.oasis.saml2.protocol.AuthnRequestType;
 import org.oasis.saml2.protocol.ResponseType;
@@ -49,7 +50,7 @@ class ResponseFactory {
         return "_" + UUID.randomUUID().toString();
     }
 
-    ResponseType makeResponse(AuthnRequestType request, Principal principal) {
+    ResponseType makeResponse(AuthnRequestType request, Principal principal, Session session) {
 
         final String requestId = request.getID();
         final String responseIssuer = serviceConfiguration.getServiceId();
@@ -84,7 +85,7 @@ class ResponseFactory {
                 // status
                 .withStatus(StatusType.builder()
                         .withStatusCode(StatusCodeType.builder()
-                                .withValue("urn:oasis:names:tc:SAML:2.0:status:Success")
+                                .withValue(SamlResponseStatus.SUCCESS.getValue())
                                 .build())
                         .build())
 
@@ -123,6 +124,7 @@ class ResponseFactory {
                         .addAuthnStatement(AuthnStatementType.builder()
                                 .withAuthnInstant(Instant.now())
                                 .withSessionNotOnOrAfter(sessionNotOnOrAfter)
+                                .withSessionIndex(session.getIndex())
                                 .withAuthnContext(AuthnContextType.builder()
                                         .withContent(
                                                 assertionObjectFactory

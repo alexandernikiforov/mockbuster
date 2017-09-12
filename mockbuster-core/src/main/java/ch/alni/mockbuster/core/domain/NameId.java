@@ -20,12 +20,14 @@ package ch.alni.mockbuster.core.domain;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 public class NameId {
     private final String nameId;
     private final String nameIdFormat;
 
-    public NameId(String nameId, String nameIdFormat) {
+    public NameId(String nameIdFormat, String nameId) {
         this.nameId = nameId;
         this.nameIdFormat = nameIdFormat;
     }
@@ -58,5 +60,10 @@ public class NameId {
                 .append(nameId)
                 .append(nameIdFormat)
                 .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

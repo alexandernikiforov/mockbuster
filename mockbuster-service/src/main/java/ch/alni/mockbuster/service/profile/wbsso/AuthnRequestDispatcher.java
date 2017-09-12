@@ -52,14 +52,10 @@ public class AuthnRequestDispatcher {
         AuthnRequestType authnRequest = event.getAuthnRequest();
         ServiceResponse serviceResponse = event.getServiceResponse();
 
-        if (BooleanUtils.isTrue(authnRequest.isForceAuthn())) {
-            requireUserInteraction(authnRequest).accept(serviceResponse);
-        } else {
-            AuthnRequests.getSubjectIdentity(authnRequest)
-                    .map(subjectIdentity -> withServiceResponseIfIdentityIsProvided(authnRequest, subjectIdentity))
-                    .orElseGet(() -> withServiceResponseIfIdentityIsMissing(authnRequest))
-                    .accept(serviceResponse);
-        }
+        AuthnRequests.getSubjectIdentity(authnRequest)
+                .map(subjectIdentity -> withServiceResponseIfIdentityIsProvided(authnRequest, subjectIdentity))
+                .orElseGet(() -> requireUserInteraction(authnRequest))
+                .accept(serviceResponse);
     }
 
     private Consumer<ServiceResponse> withServiceResponseIfIdentityIsProvided(AuthnRequestType authnRequest, NameId subjectIdentity) {
@@ -68,19 +64,8 @@ public class AuthnRequestDispatcher {
                 // yes - authenticate
                 .map(principal -> authenticate(principal, authnRequest))
 
-                // no - respond with an error if creation of new identity is not allowed
-                .orElseGet(() -> AuthnRequests.isAllowCreate(authnRequest) ?
-                        requireUserInteraction(authnRequest) : sendAuthnFailed(authnRequest));
-    }
-
-    private Consumer<ServiceResponse> withServiceResponseIfIdentityIsMissing(AuthnRequestType authnRequest) {
-        if (AuthnRequests.isAllowCreate(authnRequest)) {
-            // let the user select which identity to assume
-            return requireUserInteraction(authnRequest);
-        } else {
-            // reject such request
-            return sendAuthnFailed(authnRequest);
-        }
+                // no - respond with an error
+                .orElseGet(() -> sendUnknownPrincipal(authnRequest));
     }
 
     private Consumer<ServiceResponse> requireUserInteraction(AuthnRequestType authnRequest) {
@@ -88,10 +73,16 @@ public class AuthnRequestDispatcher {
     }
 
     private Consumer<ServiceResponse> authenticate(Principal principal, AuthnRequestType authnRequest) {
-        return serviceResponse -> eventBus.publish(new AuthnRequestAuthenticated(authnRequest, principal, serviceResponse));
+        if (BooleanUtils.isTrue(authnRequest.isForceAuthn())) {
+            return serviceResponse -> eventBus.publish(new PrincipalAuthenticationRequired(authnRequest, principal, serviceResponse));
+        } else {
+            return serviceResponse -> eventBus.publish(new AuthnRequestAuthenticated(authnRequest, principal, serviceResponse));
+        }
     }
 
-    private Consumer<ServiceResponse> sendAuthnFailed(AuthnRequestType authnRequest) {
-        return serviceResponse -> eventBus.publish(new AuthnRequestFailed(authnRequest, serviceResponse));
+    private Consumer<ServiceResponse> sendUnknownPrincipal(AuthnRequestType authnRequest) {
+        return serviceResponse -> eventBus.publish(new PrincipalNotFound(authnRequest, serviceResponse));
     }
+
+
 }

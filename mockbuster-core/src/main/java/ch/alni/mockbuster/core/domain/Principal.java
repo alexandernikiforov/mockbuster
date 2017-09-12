@@ -24,10 +24,13 @@ package ch.alni.mockbuster.core.domain;
 public class Principal {
 
     private final NameId nameId;
+    private final String displayRepresentation;
+
     private final String attributeStatement;
 
-    public Principal(NameId nameId, String attributeStatement) {
+    public Principal(NameId nameId, String displayRepresentation, String attributeStatement) {
         this.nameId = nameId;
+        this.displayRepresentation = displayRepresentation;
         this.attributeStatement = attributeStatement;
     }
 
@@ -37,5 +40,9 @@ public class Principal {
 
     public String getAttributeStatement() {
         return attributeStatement;
+    }
+
+    public String getDisplayRepresentation() {
+        return displayRepresentation;
     }
 }
