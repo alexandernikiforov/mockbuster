@@ -107,7 +107,6 @@ class ResponseFactory {
                                         assertionObjectFactory.createSubjectConfirmation(SubjectConfirmationType.builder()
                                                 .withMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer")
                                                 .withSubjectConfirmationData(SubjectConfirmationDataType.builder()
-                                                        .withNotBefore(now)
                                                         .withNotOnOrAfter(deliveryNotOnOrAfter)
                                                         .withRecipient(assertionConsumerServiceUrl)
                                                         .withInResponseTo(requestId)
