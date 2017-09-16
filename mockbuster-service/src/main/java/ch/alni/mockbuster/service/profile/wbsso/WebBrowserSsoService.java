@@ -82,7 +82,7 @@ class WebBrowserSsoService implements MockbusterSsoService {
                 );
 
                 SamlRequestValidationResult validationResult = new AuthnRequestValidation(identityProvider, serviceProvider)
-                        .run(authnRequestType);
+                        .validateRequest(authnRequestType);
 
                 if (validationResult.isValid()) {
                     List<X509Certificate> certificateList = X509Certificates.gatherCertificates(serviceProvider.getCertificates());

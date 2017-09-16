@@ -18,6 +18,7 @@
 
 package ch.alni.mockbuster.service.profile.logout;
 
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.LogoutRequestType;
@@ -26,10 +27,12 @@ public class LogoutRequestDenied implements ServiceEvent {
 
     private final LogoutRequestType logoutRequestType;
     private final ServiceResponse serviceResponse;
+    private final SamlResponseStatus responseStatus;
 
-    public LogoutRequestDenied(LogoutRequestType logoutRequestType, ServiceResponse serviceResponse) {
+    public LogoutRequestDenied(LogoutRequestType logoutRequestType, ServiceResponse serviceResponse, SamlResponseStatus responseStatus) {
         this.logoutRequestType = logoutRequestType;
         this.serviceResponse = serviceResponse;
+        this.responseStatus = responseStatus;
     }
 
     public LogoutRequestType getLogoutRequestType() {
@@ -38,5 +41,9 @@ public class LogoutRequestDenied implements ServiceEvent {
 
     public ServiceResponse getServiceResponse() {
         return serviceResponse;
+    }
+
+    public SamlResponseStatus getResponseStatus() {
+        return responseStatus;
     }
 }

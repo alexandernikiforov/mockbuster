@@ -21,11 +21,13 @@ package ch.alni.mockbuster.service.profile.logout;
 import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.core.domain.ServiceProviderRepository;
 import ch.alni.mockbuster.saml2.Saml2ProtocolObjects;
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.MockbusterLogoutService;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
 import ch.alni.mockbuster.service.profile.common.SamlRequestSignatureValidator;
 import ch.alni.mockbuster.service.profile.common.SamlRequests;
+import ch.alni.mockbuster.service.profile.validation.SamlRequestValidationResult;
 import ch.alni.mockbuster.signature.pkix.X509Certificates;
 import org.oasis.saml2.protocol.LogoutRequestType;
 import org.oasis.saml2.protocol.ObjectFactory;
@@ -71,17 +73,27 @@ public class LocalLogoutService implements MockbusterLogoutService {
                         objectFactory.createLogoutRequest(logoutRequestType)
                 );
 
-                List<X509Certificate> certificateList = X509Certificates.gatherCertificates(serviceProvider.getCertificates());
+                SamlRequestValidationResult validationResult = new LogoutValidation().validateRequest(logoutRequestType);
 
-                if (signatureValidator.validateSignature(document, certificateList, true)) {
-                    eventBus.publish(new LogoutRequestReceived(logoutRequestType, serviceResponse));
+                if (validationResult.isValid()) {
+                    List<X509Certificate> certificateList = X509Certificates.gatherCertificates(serviceProvider.getCertificates());
+
+                    if (signatureValidator.validateSignature(document, certificateList, true)) {
+                        eventBus.publish(new LogoutRequestReceived(logoutRequestType, serviceResponse));
+                    } else {
+                        LOG.info("invalid or non existing signature; LogoutRequest with ID {} will be denied", logoutRequestType.getID());
+                        eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse, SamlResponseStatus.REQUEST_DENIED));
+                    }
                 } else {
-                    LOG.info("invalid or non existing signature; LogoutRequest with ID {} will be denied", logoutRequestType.getID());
-                    eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse));
+                    LOG.info("LogoutRequest with ID {} cannot be validated: {}",
+                            logoutRequestType.getID(), validationResult.getErrorMessages()
+                    );
+                    eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse, SamlResponseStatus.REQUEST_DENIED));
                 }
+
             } else {
                 LOG.info("service provider not found or unknown; LogoutRequest with ID {} will be denied", logoutRequestType.getID());
-                eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse));
+                eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse, SamlResponseStatus.REQUEST_DENIED));
             }
 
         } catch (JAXBException e) {

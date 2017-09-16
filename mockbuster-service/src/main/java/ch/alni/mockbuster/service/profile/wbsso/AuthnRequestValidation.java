@@ -35,7 +35,7 @@ import java.util.Optional;
 import static ch.alni.mockbuster.service.profile.validation.SamlRequestValidationResultFactory.makeInvalid;
 import static ch.alni.mockbuster.service.profile.validation.SamlRequestValidationResultFactory.makeValid;
 
-public class AuthnRequestValidation {
+class AuthnRequestValidation {
 
     private final IdentityProvider identityProvider;
     private final ServiceProvider serviceProvider;
@@ -48,12 +48,12 @@ public class AuthnRequestValidation {
                     this::validateNameIdPolicy
             ));
 
-    public AuthnRequestValidation(IdentityProvider identityProvider, ServiceProvider serviceProvider) {
+    AuthnRequestValidation(IdentityProvider identityProvider, ServiceProvider serviceProvider) {
         this.identityProvider = identityProvider;
         this.serviceProvider = serviceProvider;
     }
 
-    public SamlRequestValidationResult run(AuthnRequestType authnRequestType) {
+    SamlRequestValidationResult validateRequest(AuthnRequestType authnRequestType) {
         return authnRequestTypeSamlRequestValidator.validate(authnRequestType);
     }
 
