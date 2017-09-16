@@ -16,40 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.core.domain;
+package ch.alni.mockbuster.saml2;
 
-import java.util.UUID;
+public enum SamlResponseStatus {
+    REQUEST_DENIED("urn:oasis:names:tc:SAML:2.0:status:RequestDenied"),
+    AUTHN_FAILED("urn:oasis:names:tc:SAML:2.0:status:AuthnFailed"),
+    SUCCESS("urn:oasis:names:tc:SAML:2.0:status:Success"),
+    INVALID_NAMEID_POLICY("urn:oasis:names:tc:SAML:2.0:status:InvalidNameIDPolicy"),
+    UNKNOWN_PRINCIPAL("urn:oasis:names:tc:SAML:2.0:status:UnknownPrincipal");
 
-public class IdentityProvider {
-    private String id;
+    private final String value;
 
-    private String entityId;
-
-    private boolean wantAuthnRequestsSigned;
-
-    private String nameIdPolicyFormat;
-
-    public IdentityProvider() {
-        id = UUID.randomUUID().toString();
+    SamlResponseStatus(String value) {
+        this.value = value;
     }
 
-    public String getId() {
-        return id;
+    public String getValue() {
+        return value;
     }
-
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public boolean isWantAuthnRequestsSigned() {
-        return wantAuthnRequestsSigned;
-    }
-
-    /**
-     * Returns the format of NameIDs the will be created by this provider.
-     */
-    public String getNameIdPolicyFormat() {
-        return nameIdPolicyFormat;
-    }
-
 }

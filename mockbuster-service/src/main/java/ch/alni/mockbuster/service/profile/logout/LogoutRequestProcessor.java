@@ -20,10 +20,10 @@ package ch.alni.mockbuster.service.profile.logout;
 
 
 import ch.alni.mockbuster.core.domain.Principal;
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceConfiguration;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
-import ch.alni.mockbuster.service.profile.common.SamlResponseStatus;
 import ch.alni.mockbuster.service.session.Session;
 import ch.alni.mockbuster.service.session.SessionRepository;
 import org.oasis.saml2.protocol.LogoutRequestType;

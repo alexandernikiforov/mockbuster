@@ -23,11 +23,13 @@ import ch.alni.mockbuster.core.domain.IdentityProviderRepository;
 import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.core.domain.ServiceProviderRepository;
 import ch.alni.mockbuster.saml2.Saml2ProtocolObjects;
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.MockbusterSsoService;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
 import ch.alni.mockbuster.service.profile.common.SamlRequestSignatureValidator;
 import ch.alni.mockbuster.service.profile.common.SamlRequests;
+import ch.alni.mockbuster.service.profile.validation.SamlRequestValidationResult;
 import ch.alni.mockbuster.signature.pkix.X509Certificates;
 import org.oasis.saml2.protocol.AuthnRequestType;
 import org.oasis.saml2.protocol.ObjectFactory;
@@ -79,17 +81,30 @@ class WebBrowserSsoService implements MockbusterSsoService {
                         objectFactory.createAuthnRequest(authnRequestType)
                 );
 
-                List<X509Certificate> certificateList = X509Certificates.gatherCertificates(serviceProvider.getCertificates());
+                SamlRequestValidationResult validationResult = new AuthnRequestValidation(identityProvider, serviceProvider)
+                        .run(authnRequestType);
 
-                if (signatureValidator.validateSignature(document, certificateList, identityProvider.isWantAuthnRequestsSigned())) {
-                    eventBus.publish(new AuthnRequestReceived(authnRequestType, serviceResponse));
+                if (validationResult.isValid()) {
+                    List<X509Certificate> certificateList = X509Certificates.gatherCertificates(serviceProvider.getCertificates());
+
+                    if (signatureValidator.validateSignature(document, certificateList, identityProvider.isWantAuthnRequestsSigned())) {
+                        eventBus.publish(new AuthnRequestReceived(authnRequestType, serviceResponse));
+                    } else {
+                        LOG.info("invalid or non existing signature; AuthnRequest with ID {} will be denied", authnRequestType.getID());
+                        eventBus.publish(new AuthnRequestFailed(authnRequestType, serviceResponse, SamlResponseStatus.REQUEST_DENIED));
+                    }
                 } else {
-                    LOG.info("invalid or non existing signature; AuthnRequest {} will be denied", authnRequestType.getID());
-                    eventBus.publish(new AuthnRequestDenied(authnRequestType, serviceResponse));
+                    LOG.info("cannot validate AuthnRequest with ID {}, error: {}",
+                            authnRequestType.getID(),
+                            validationResult.getErrorMessages()
+                    );
+
+                    eventBus.publish(new AuthnRequestFailed(authnRequestType, serviceResponse, validationResult.getResponseStatus()));
                 }
+
             } else {
-                LOG.info("service provider not found or unknown; AuthnRequest {} will be denied", authnRequestType.getID());
-                eventBus.publish(new AuthnRequestDenied(authnRequestType, serviceResponse));
+                LOG.info("service provider not found or unknown; AuthnRequest with ID {} will be denied", authnRequestType.getID());
+                eventBus.publish(new AuthnRequestFailed(authnRequestType, serviceResponse, SamlResponseStatus.REQUEST_DENIED));
             }
 
         } catch (JAXBException e) {

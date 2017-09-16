@@ -21,6 +21,7 @@ package ch.alni.mockbuster.service.profile.wbsso;
 import ch.alni.mockbuster.core.domain.NameId;
 import ch.alni.mockbuster.core.domain.Principal;
 import ch.alni.mockbuster.core.domain.PrincipalRepository;
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
 import org.apache.commons.lang.BooleanUtils;
@@ -81,7 +82,11 @@ public class AuthnRequestDispatcher {
     }
 
     private Consumer<ServiceResponse> sendUnknownPrincipal(AuthnRequestType authnRequest) {
-        return serviceResponse -> eventBus.publish(new PrincipalNotFound(authnRequest, serviceResponse));
+        return serviceResponse -> eventBus.publish(new AuthnRequestFailed(
+                authnRequest,
+                serviceResponse,
+                SamlResponseStatus.UNKNOWN_PRINCIPAL)
+        );
     }
 
 

@@ -18,27 +18,32 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.AuthnRequestType;
 
-/**
- * Is triggered when a authn request fails.
- */
-public class PrincipalNotFound implements ServiceEvent {
-    private final AuthnRequestType authnRequest;
-    private final ServiceResponse serviceResponse;
+public class AuthnRequestFailed implements ServiceEvent {
 
-    public PrincipalNotFound(AuthnRequestType authnRequest, ServiceResponse serviceResponse) {
-        this.authnRequest = authnRequest;
+    private final AuthnRequestType authnRequestType;
+    private final ServiceResponse serviceResponse;
+    private final SamlResponseStatus responseStatus;
+
+    public AuthnRequestFailed(AuthnRequestType authnRequestType, ServiceResponse serviceResponse, SamlResponseStatus responseStatus) {
+        this.authnRequestType = authnRequestType;
         this.serviceResponse = serviceResponse;
+        this.responseStatus = responseStatus;
     }
 
     public AuthnRequestType getAuthnRequestType() {
-        return authnRequest;
+        return authnRequestType;
     }
 
     public ServiceResponse getServiceResponse() {
         return serviceResponse;
+    }
+
+    public SamlResponseStatus getResponseStatus() {
+        return responseStatus;
     }
 }

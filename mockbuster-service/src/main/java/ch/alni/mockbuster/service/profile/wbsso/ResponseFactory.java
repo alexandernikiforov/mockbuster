@@ -20,8 +20,8 @@ package ch.alni.mockbuster.service.profile.wbsso;
 
 import ch.alni.mockbuster.core.domain.Principal;
 import ch.alni.mockbuster.saml2.AttributeStatements;
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceConfiguration;
-import ch.alni.mockbuster.service.profile.common.SamlResponseStatus;
 import ch.alni.mockbuster.service.session.Session;
 import org.oasis.saml2.assertion.*;
 import org.oasis.saml2.protocol.AuthnRequestType;

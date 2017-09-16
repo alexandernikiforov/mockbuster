@@ -16,17 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.profile.common;
+package ch.alni.mockbuster.saml2;
 
-public enum SamlResponseStatus {
-    REQUEST_DENIED("urn:oasis:names:tc:SAML:2.0:status:RequestDenied"),
-    AUTHN_FAILED("urn:oasis:names:tc:SAML:2.0:status:AuthnFailed"),
-    SUCCESS("urn:oasis:names:tc:SAML:2.0:status:Success"),
-    UNKNOWN_PRINCIPAL("urn:oasis:names:tc:SAML:2.0:status:UnknownPrincipal");
+public enum NameIdFormat {
+    ENTITY("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"),
+    UNSPECIFIED("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified");
 
     private final String value;
 
-    SamlResponseStatus(String value) {
+    NameIdFormat(String value) {
         this.value = value;
     }
 

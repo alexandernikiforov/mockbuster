@@ -16,27 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.profile.wbsso;
+package ch.alni.mockbuster.service.profile.validation;
 
-import ch.alni.mockbuster.service.ServiceResponse;
-import ch.alni.mockbuster.service.events.ServiceEvent;
-import org.oasis.saml2.protocol.AuthnRequestType;
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 
-public class AuthnRequestDenied implements ServiceEvent {
+import java.util.Collections;
 
-    private final AuthnRequestType authnRequestType;
-    private final ServiceResponse serviceResponse;
+public final class SamlRequestValidationResultFactory {
 
-    public AuthnRequestDenied(AuthnRequestType authnRequestType, ServiceResponse serviceResponse) {
-        this.authnRequestType = authnRequestType;
-        this.serviceResponse = serviceResponse;
+    private SamlRequestValidationResultFactory() {
     }
 
-    public AuthnRequestType getAuthnRequestType() {
-        return authnRequestType;
+    public static SamlRequestValidationResult makeValid() {
+        return new SamlRequestValidationResult(true, Collections.emptyList(), SamlResponseStatus.SUCCESS);
     }
 
-    public ServiceResponse getServiceResponse() {
-        return serviceResponse;
+    public static SamlRequestValidationResult makeInvalid(String errorMessage, SamlResponseStatus samlResponseStatus) {
+        return new SamlRequestValidationResult(false, Collections.singletonList(errorMessage), samlResponseStatus);
     }
 }

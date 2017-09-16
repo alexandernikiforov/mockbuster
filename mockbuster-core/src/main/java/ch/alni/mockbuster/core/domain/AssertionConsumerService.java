@@ -23,7 +23,7 @@ import java.util.UUID;
 public class AssertionConsumerService {
     private String id;
 
-    private String index;
+    private int index;
 
     private String url;
 
@@ -31,14 +31,14 @@ public class AssertionConsumerService {
         id = UUID.randomUUID().toString();
     }
 
-    public AssertionConsumerService(String index, String url) {
+    public AssertionConsumerService(int index, String url) {
         id = UUID.randomUUID().toString();
 
         this.index = index;
         this.url = url;
     }
 
-    public String getIndex() {
+    public int getIndex() {
         return index;
     }
 

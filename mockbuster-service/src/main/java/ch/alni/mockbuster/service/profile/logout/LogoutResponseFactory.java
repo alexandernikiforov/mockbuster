@@ -18,8 +18,8 @@
 
 package ch.alni.mockbuster.service.profile.logout;
 
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceConfiguration;
-import ch.alni.mockbuster.service.profile.common.SamlResponseStatus;
 import org.oasis.saml2.assertion.NameIDType;
 import org.oasis.saml2.protocol.LogoutRequestType;
 import org.oasis.saml2.protocol.StatusCodeType;

@@ -21,7 +21,6 @@ package ch.alni.mockbuster.service.profile.wbsso;
 import ch.alni.mockbuster.core.domain.Principal;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
-import ch.alni.mockbuster.service.profile.common.SamlResponseStatus;
 import ch.alni.mockbuster.service.session.Session;
 import ch.alni.mockbuster.service.session.SessionRepository;
 import org.oasis.saml2.protocol.AuthnRequestType;
@@ -79,21 +78,11 @@ public class AuthnRequestProcessor {
     }
 
     @EventListener
-    public void onAuthnRequestDenied(AuthnRequestDenied event) {
+    public void onAuthnRequestFailed(AuthnRequestFailed event) {
         AuthnRequestType authnRequestType = event.getAuthnRequestType();
         ServiceResponse serviceResponse = event.getServiceResponse();
 
-        ResponseType responseType = responseFactory.makeResponse(authnRequestType, SamlResponseStatus.REQUEST_DENIED);
-
-        eventBus.publish(new AuthnResponsePrepared(responseType, serviceResponse));
-    }
-
-    @EventListener
-    public void onPrincipalNotFound(PrincipalNotFound event) {
-        AuthnRequestType authnRequestType = event.getAuthnRequestType();
-        ServiceResponse serviceResponse = event.getServiceResponse();
-
-        ResponseType responseType = responseFactory.makeResponse(authnRequestType, SamlResponseStatus.UNKNOWN_PRINCIPAL);
+        ResponseType responseType = responseFactory.makeResponse(authnRequestType, event.getResponseStatus());
 
         eventBus.publish(new AuthnResponsePrepared(responseType, serviceResponse));
     }

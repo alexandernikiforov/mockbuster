@@ -58,6 +58,7 @@ public class LocalLogoutService implements MockbusterLogoutService {
 
     @Override
     public void logout(String serviceRequest, ServiceResponse serviceResponse) {
+        LOG.info("LogoutRequest received");
         try {
             LogoutRequestType logoutRequestType = Saml2ProtocolObjects.unmarshal(serviceRequest, LogoutRequestType.class);
 
@@ -75,14 +76,16 @@ public class LocalLogoutService implements MockbusterLogoutService {
                 if (signatureValidator.validateSignature(document, certificateList, true)) {
                     eventBus.publish(new LogoutRequestReceived(logoutRequestType, serviceResponse));
                 } else {
+                    LOG.info("invalid or non existing signature; LogoutRequest with ID {} will be denied", logoutRequestType.getID());
                     eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse));
                 }
             } else {
+                LOG.info("service provider not found or unknown; LogoutRequest with ID {} will be denied", logoutRequestType.getID());
                 eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse));
             }
 
         } catch (JAXBException e) {
-            LOG.info("cannot parse the logout request", e);
+            LOG.info("cannot parse LogoutRequest", e);
             serviceResponse.sendInvalidRequest();
         }
 
