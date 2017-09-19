@@ -18,8 +18,6 @@
 
 package ch.alni.mockbuster.core.domain;
 
-import org.apache.commons.lang.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,16 +48,6 @@ public class ServiceProvider {
         this.entityId = entityId;
         this.displayName = displayName;
         this.wantAssertionSigned = wantAssertionSigned;
-    }
-
-    public boolean containsAssertionServiceUrl(String assertionServiceUrl) {
-        return assertionConsumerServiceList.stream()
-                .anyMatch(assertionConsumerService -> StringUtils.equals(assertionServiceUrl, assertionConsumerService.getUrl()));
-    }
-
-    public boolean containsAssertionServiceIndex(Integer assertionServiceIndex) {
-        return assertionConsumerServiceList.stream()
-                .anyMatch(assertionConsumerService -> assertionServiceIndex == assertionConsumerService.getIndex());
     }
 
     public String getId() {

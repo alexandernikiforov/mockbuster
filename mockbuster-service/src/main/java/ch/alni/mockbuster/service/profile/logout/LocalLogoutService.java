@@ -101,6 +101,5 @@ public class LocalLogoutService implements MockbusterLogoutService {
             serviceResponse.sendInvalidRequest();
         }
 
-
     }
 }

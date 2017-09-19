@@ -18,6 +18,7 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.core.domain.AssertionConsumerServices;
 import ch.alni.mockbuster.core.domain.IdentityProvider;
 import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.saml2.NameIdFormat;
@@ -106,7 +107,8 @@ class AuthnRequestValidation {
         String assertionConsumerServiceUrl = authnRequestType.getAssertionConsumerServiceURL();
         Integer assertionConsumerServiceIndex = authnRequestType.getAssertionConsumerServiceIndex();
         if (null != assertionConsumerServiceUrl) {
-            if (serviceProvider.containsAssertionServiceUrl(assertionConsumerServiceUrl)) {
+            if (AssertionConsumerServices.containsAssertionServiceUrl(serviceProvider.getAssertionConsumerServices(),
+                    assertionConsumerServiceUrl)) {
                 return makeValid();
             } else {
                 return makeInvalid(
@@ -115,7 +117,8 @@ class AuthnRequestValidation {
                 );
             }
         } else if (null != assertionConsumerServiceIndex) {
-            if (serviceProvider.containsAssertionServiceIndex(assertionConsumerServiceIndex)) {
+            if (AssertionConsumerServices.containsAssertionServiceIndex(serviceProvider.getAssertionConsumerServices(),
+                    assertionConsumerServiceIndex)) {
                 return makeValid();
             } else {
                 return makeInvalid(

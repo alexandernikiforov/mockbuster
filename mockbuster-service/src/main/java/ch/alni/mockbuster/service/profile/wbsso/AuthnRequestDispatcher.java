@@ -21,6 +21,7 @@ package ch.alni.mockbuster.service.profile.wbsso;
 import ch.alni.mockbuster.core.domain.NameId;
 import ch.alni.mockbuster.core.domain.Principal;
 import ch.alni.mockbuster.core.domain.PrincipalRepository;
+import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
@@ -52,18 +53,21 @@ public class AuthnRequestDispatcher {
     public void onAuthnRequestReceived(AuthnRequestReceived event) {
         AuthnRequestType authnRequest = event.getAuthnRequest();
         ServiceResponse serviceResponse = event.getServiceResponse();
+        ServiceProvider serviceProvider = event.getServiceProvider();
 
         AuthnRequests.getSubjectIdentity(authnRequest)
-                .map(subjectIdentity -> withServiceResponseIfIdentityIsProvided(authnRequest, subjectIdentity))
+                .map(subjectIdentity -> withServiceResponseIfIdentityIsProvided(authnRequest, serviceProvider, subjectIdentity))
                 .orElseGet(() -> requireUserInteraction(authnRequest))
                 .accept(serviceResponse);
     }
 
-    private Consumer<ServiceResponse> withServiceResponseIfIdentityIsProvided(AuthnRequestType authnRequest, NameId subjectIdentity) {
+    private Consumer<ServiceResponse> withServiceResponseIfIdentityIsProvided(AuthnRequestType authnRequest,
+                                                                              ServiceProvider serviceProvider,
+                                                                              NameId subjectIdentity) {
         // have we already mapped this identity to a principal?
         return principalRepository.findByNameId(subjectIdentity)
                 // yes - authenticate
-                .map(principal -> authenticate(principal, authnRequest))
+                .map(principal -> authenticate(authnRequest, serviceProvider, principal))
 
                 // no - respond with an error
                 .orElseGet(() -> sendUnknownPrincipal(authnRequest));
@@ -73,11 +77,12 @@ public class AuthnRequestDispatcher {
         return serviceResponse -> eventBus.publish(new UserInteractionRequired(authnRequest, serviceResponse));
     }
 
-    private Consumer<ServiceResponse> authenticate(Principal principal, AuthnRequestType authnRequest) {
+    private Consumer<ServiceResponse> authenticate(AuthnRequestType authnRequest, ServiceProvider serviceProvider, Principal principal) {
         if (BooleanUtils.isTrue(authnRequest.isForceAuthn())) {
             return serviceResponse -> eventBus.publish(new PrincipalAuthenticationRequired(authnRequest, principal, serviceResponse));
         } else {
-            return serviceResponse -> eventBus.publish(new AuthnRequestAuthenticated(authnRequest, principal, serviceResponse));
+            return serviceResponse ->
+                    eventBus.publish(new AuthnRequestAuthenticated(authnRequest, serviceProvider, principal, serviceResponse));
         }
     }
 

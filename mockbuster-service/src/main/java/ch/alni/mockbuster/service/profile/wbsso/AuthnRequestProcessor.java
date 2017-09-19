@@ -19,6 +19,7 @@
 package ch.alni.mockbuster.service.profile.wbsso;
 
 import ch.alni.mockbuster.core.domain.Principal;
+import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
 import ch.alni.mockbuster.service.session.Session;
@@ -55,12 +56,13 @@ public class AuthnRequestProcessor {
         AuthnRequestType authnRequest = event.getAuthnRequest();
         ServiceResponse serviceResponse = event.getServiceResponse();
         Principal principal = event.getPrincipal();
+        ServiceProvider serviceProvider = event.getServiceProvider();
 
         Session currentSession = sessionRepository.getCurrentSession();
         currentSession.storeIdentity(principal);
 
         // create the response
-        ResponseType responseType = responseFactory.makeResponse(authnRequest, principal, currentSession);
+        ResponseType responseType = responseFactory.makeResponse(authnRequest, serviceProvider, principal, currentSession);
 
         eventBus.publish(new AuthnResponsePrepared(responseType, serviceResponse));
     }

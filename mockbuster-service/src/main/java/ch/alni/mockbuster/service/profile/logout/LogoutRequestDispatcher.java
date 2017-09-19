@@ -20,6 +20,7 @@ package ch.alni.mockbuster.service.profile.logout;
 
 import ch.alni.mockbuster.core.domain.Principal;
 import ch.alni.mockbuster.core.domain.PrincipalRepository;
+import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.EventBus;
 import org.oasis.saml2.protocol.LogoutRequestType;
@@ -58,7 +59,8 @@ public class LogoutRequestDispatcher {
     }
 
     private Consumer<ServiceResponse> logoutWithPrincipalNotFound(LogoutRequestType logoutRequestType) {
-        return serviceResponse -> eventBus.publish(new LogoutRequestPrincipalNotFound(logoutRequestType, serviceResponse));
+        return serviceResponse -> eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse,
+                SamlResponseStatus.UNKNOWN_PRINCIPAL));
     }
 
 }

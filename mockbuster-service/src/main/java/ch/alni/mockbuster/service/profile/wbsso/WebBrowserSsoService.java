@@ -88,7 +88,7 @@ class WebBrowserSsoService implements MockbusterSsoService {
                     List<X509Certificate> certificateList = X509Certificates.gatherCertificates(serviceProvider.getCertificates());
 
                     if (signatureValidator.validateSignature(document, certificateList, identityProvider.isWantAuthnRequestsSigned())) {
-                        eventBus.publish(new AuthnRequestReceived(authnRequestType, serviceResponse));
+                        eventBus.publish(new AuthnRequestReceived(authnRequestType, serviceProvider, serviceResponse));
                     } else {
                         LOG.info("invalid or non existing signature; AuthnRequest with ID {} will be denied", authnRequestType.getID());
                         eventBus.publish(new AuthnRequestFailed(authnRequestType, serviceResponse, SamlResponseStatus.REQUEST_DENIED));

@@ -18,7 +18,10 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.core.domain.AssertionConsumerService;
+import ch.alni.mockbuster.core.domain.AssertionConsumerServices;
 import ch.alni.mockbuster.core.domain.Principal;
+import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.saml2.AttributeStatements;
 import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceConfiguration;
@@ -42,7 +45,7 @@ class ResponseFactory {
 
     private final ServiceConfiguration serviceConfiguration;
 
-    public ResponseFactory(ServiceConfiguration serviceConfiguration) {
+    ResponseFactory(ServiceConfiguration serviceConfiguration) {
         this.serviceConfiguration = serviceConfiguration;
     }
 
@@ -50,7 +53,7 @@ class ResponseFactory {
         return "_" + UUID.randomUUID().toString();
     }
 
-    ResponseType makeResponse(AuthnRequestType request, Principal principal, Session session) {
+    ResponseType makeResponse(AuthnRequestType request, ServiceProvider serviceProvider, Principal principal, Session session) {
 
         final String requestId = request.getID();
         final String responseIssuer = serviceConfiguration.getServiceId();
@@ -64,7 +67,12 @@ class ResponseFactory {
         final Instant sessionNotOnOrAfter = serviceConfiguration.isSessionPermanent() ? null :
                 now.plus(serviceConfiguration.getSessionNotOnOrAfterInSeconds(), ChronoUnit.SECONDS);
 
-        final String assertionConsumerServiceUrl = request.getAssertionConsumerServiceURL();
+        final String assertionConsumerServiceUrl = AssertionConsumerServices.findByUrlOrIndex(
+                serviceProvider.getAssertionConsumerServices(),
+                request.getAssertionConsumerServiceURL(),
+                request.getAssertionConsumerServiceIndex())
+                .map(AssertionConsumerService::getUrl)
+                .orElseThrow(() -> new IllegalArgumentException("either url or index should be present"));
 
         final AttributeStatementType attributeStatementType =
                 AttributeStatements.toAttributeStatementType(principal.getAttributeStatement());

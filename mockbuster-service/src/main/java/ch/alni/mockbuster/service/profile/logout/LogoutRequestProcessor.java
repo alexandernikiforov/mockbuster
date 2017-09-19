@@ -75,16 +75,4 @@ public class LogoutRequestProcessor {
         eventBus.publish(new LogoutResponsePrepared(statusResponseType, serviceResponse));
     }
 
-    @EventListener
-    public void onLogoutRequestPrincipalNotFound(LogoutRequestPrincipalNotFound event) {
-        LogoutRequestType logoutRequestType = event.getLogoutRequestType();
-        ServiceResponse serviceResponse = event.getServiceResponse();
-
-        StatusResponseType statusResponseType = logoutResponseFactory.makeStatusResponse(logoutRequestType,
-                SamlResponseStatus.UNKNOWN_PRINCIPAL);
-
-        eventBus.publish(new LogoutResponsePrepared(statusResponseType, serviceResponse));
-
-    }
-
 }

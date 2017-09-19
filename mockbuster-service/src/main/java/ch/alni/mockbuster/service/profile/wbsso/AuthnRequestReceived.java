@@ -18,6 +18,7 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.AuthnRequestType;
@@ -27,11 +28,17 @@ import org.oasis.saml2.protocol.AuthnRequestType;
  */
 public class AuthnRequestReceived implements ServiceEvent {
     private final AuthnRequestType authnRequest;
+    private final ServiceProvider serviceProvider;
     private final ServiceResponse serviceResponse;
 
-    public AuthnRequestReceived(AuthnRequestType authnRequest, ServiceResponse serviceResponse) {
+    public AuthnRequestReceived(AuthnRequestType authnRequest, ServiceProvider serviceProvider, ServiceResponse serviceResponse) {
         this.authnRequest = authnRequest;
+        this.serviceProvider = serviceProvider;
         this.serviceResponse = serviceResponse;
+    }
+
+    public ServiceProvider getServiceProvider() {
+        return serviceProvider;
     }
 
     public AuthnRequestType getAuthnRequest() {

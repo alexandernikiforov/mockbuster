@@ -19,6 +19,7 @@
 package ch.alni.mockbuster.service.profile.wbsso;
 
 import ch.alni.mockbuster.core.domain.Principal;
+import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.AuthnRequestType;
@@ -28,16 +29,25 @@ import org.oasis.saml2.protocol.AuthnRequestType;
  */
 public class AuthnRequestAuthenticated implements ServiceEvent {
     private final AuthnRequestType authnRequest;
+    private final ServiceProvider serviceProvider;
     private final Principal principal;
     private final ServiceResponse serviceResponse;
 
-    public AuthnRequestAuthenticated(AuthnRequestType authnRequest, Principal principal, ServiceResponse serviceResponse) {
+    AuthnRequestAuthenticated(AuthnRequestType authnRequest,
+                              ServiceProvider serviceProvider,
+                              Principal principal,
+                              ServiceResponse serviceResponse) {
         this.authnRequest = authnRequest;
+        this.serviceProvider = serviceProvider;
         this.principal = principal;
         this.serviceResponse = serviceResponse;
     }
 
-    public AuthnRequestType getAuthnRequest() {
+    public ServiceProvider getServiceProvider() {
+        return serviceProvider;
+    }
+
+    AuthnRequestType getAuthnRequest() {
         return authnRequest;
     }
 
@@ -45,7 +55,7 @@ public class AuthnRequestAuthenticated implements ServiceEvent {
         return serviceResponse;
     }
 
-    public Principal getPrincipal() {
+    Principal getPrincipal() {
         return principal;
     }
 }
