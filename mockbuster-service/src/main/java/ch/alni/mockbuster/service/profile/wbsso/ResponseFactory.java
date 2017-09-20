@@ -72,7 +72,7 @@ class ResponseFactory {
                 request.getAssertionConsumerServiceURL(),
                 request.getAssertionConsumerServiceIndex())
                 .map(AssertionConsumerService::getUrl)
-                .orElseThrow(() -> new IllegalArgumentException("either url or index should be present"));
+                .orElseThrow(() -> new IllegalArgumentException("either url or index should be provided"));
 
         final AttributeStatementType attributeStatementType =
                 AttributeStatements.toAttributeStatementType(principal.getAttributeStatement());

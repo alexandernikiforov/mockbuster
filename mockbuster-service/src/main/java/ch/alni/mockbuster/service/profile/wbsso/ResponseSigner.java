@@ -26,12 +26,18 @@ import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
+import java.text.MessageFormat;
 
 
-public class ResponseSigner {
+class ResponseSigner {
     // where to place signature
     private final static String RESPONSE_NODE_PATH = XPaths.toAbsolutePath(
             new QName(Saml2NamespaceUri.SAML2_PROTOCOL_NAMESPACE_URI, "Response"));
+
+    private final static String ASSERTION_NODE_PATH_TEMPLATE = XPaths.toAbsolutePath(
+            new QName(Saml2NamespaceUri.SAML2_PROTOCOL_NAMESPACE_URI, "Response"),
+            new QName(Saml2NamespaceUri.SAML2_ASSERTION_NAMESPACE_URI, "Assertion"))
+            + "[{0}]";
 
     // next sibling is
     private final static String RESPONSE_NEXT_SIBLING_PATH = XPaths.toAbsolutePath(
@@ -39,16 +45,38 @@ public class ResponseSigner {
             new QName(Saml2NamespaceUri.SAML2_ASSERTION_NAMESPACE_URI, "Issuer"))
             + "/following-sibling::*[position() = 1]";
 
+    private final static String ASSERTION_NEXT_SIBLING_PATH_TEMPLATE = XPaths.toAbsolutePath(
+            new QName(Saml2NamespaceUri.SAML2_PROTOCOL_NAMESPACE_URI, "Response"),
+            new QName(Saml2NamespaceUri.SAML2_ASSERTION_NAMESPACE_URI, "Assertion"))
+            + "[{0}]"
+            + XPaths.toAbsolutePath(new QName(Saml2NamespaceUri.SAML2_ASSERTION_NAMESPACE_URI, "Issuer"))
+            + "/following-sibling::*[position() = 1]";
+
     private final EnvelopedSigner envelopedSigner;
 
-    public ResponseSigner(EnvelopedSigner envelopedSigner) {
+    ResponseSigner(EnvelopedSigner envelopedSigner) {
         this.envelopedSigner = envelopedSigner;
     }
 
-    public void signResponse(Document responseDocument) throws JAXBException {
+    void signResponse(Document responseDocument) {
         // sign the response itself
         envelopedSigner.sign(responseDocument,
                 RESPONSE_NODE_PATH,
                 new SignatureLocation(RESPONSE_NODE_PATH, RESPONSE_NEXT_SIBLING_PATH));
     }
+
+    /**
+     * Signs assertion in this document.
+     *
+     * @param responseDocument the basis document
+     * @param index            index of the assertion (beginning with 1)
+     * @throws JAXBException
+     */
+    void signAssertion(Document responseDocument, int index) {
+        final String assertionNodePath = MessageFormat.format(ASSERTION_NODE_PATH_TEMPLATE, index);
+        final String assertionNextSiblingPath = MessageFormat.format(ASSERTION_NEXT_SIBLING_PATH_TEMPLATE, index);
+
+        envelopedSigner.sign(responseDocument, assertionNodePath, new SignatureLocation(assertionNodePath, assertionNextSiblingPath));
+    }
+
 }

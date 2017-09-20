@@ -18,9 +18,11 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.saml2.Saml2ProtocolObjects;
 import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.signature.enveloped.EnvelopedSigner;
+import org.oasis.saml2.assertion.AssertionType;
 import org.oasis.saml2.protocol.ObjectFactory;
 import org.oasis.saml2.protocol.ResponseType;
 import org.slf4j.Logger;
@@ -47,6 +49,7 @@ public class AuthnResponseSender {
     @EventListener
     public void onAuthnResponse(AuthnResponsePrepared event) {
         ResponseType responseType = event.getResponseType();
+        ServiceProvider serviceProvider = event.getServiceProvider();
         ServiceResponse serviceResponse = event.getServiceResponse();
 
         try {
@@ -54,6 +57,18 @@ public class AuthnResponseSender {
                     objectFactory.createResponse(responseType)
             );
 
+            if (null != serviceProvider && serviceProvider.isWantAssertionSigned()
+                    && !responseType.getAssertionOrEncryptedAssertion().isEmpty()) {
+                // sign assertions
+                int count = 1;
+                for (Object xmlObject : responseType.getAssertionOrEncryptedAssertion()) {
+                    if (xmlObject instanceof AssertionType) {
+                        responseSigner.signAssertion(document, count++);
+                    }
+                }
+            }
+
+            // now sign the whole document
             responseSigner.signResponse(document);
 
             String response = Saml2ProtocolObjects.protocolDocumentToString(document, ResponseType.class);

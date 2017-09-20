@@ -64,7 +64,7 @@ public class AuthnRequestProcessor {
         // create the response
         ResponseType responseType = responseFactory.makeResponse(authnRequest, serviceProvider, principal, currentSession);
 
-        eventBus.publish(new AuthnResponsePrepared(responseType, serviceResponse));
+        eventBus.publish(new AuthnResponsePrepared(responseType, serviceProvider, serviceResponse));
     }
 
     @EventListener
