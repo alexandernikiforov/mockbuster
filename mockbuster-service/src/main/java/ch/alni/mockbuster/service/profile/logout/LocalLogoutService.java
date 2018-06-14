@@ -23,7 +23,7 @@ import ch.alni.mockbuster.core.domain.ServiceProviderRepository;
 import ch.alni.mockbuster.saml2.Saml2ProtocolObjects;
 import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.MockbusterLogoutService;
-import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.ServiceRequestTicket;
 import ch.alni.mockbuster.service.events.EventBus;
 import ch.alni.mockbuster.service.profile.common.SamlRequestSignatureValidator;
 import ch.alni.mockbuster.service.profile.common.SamlRequests;
@@ -49,7 +49,7 @@ public class LocalLogoutService implements MockbusterLogoutService {
     private final EventBus eventBus;
     private final ServiceProviderRepository serviceProviderRepository;
 
-    private final SamlRequestSignatureValidator signatureValidator = LogoutRequestSignatureValidatorFactory.make();
+    private final SamlRequestSignatureValidator signatureValidator = LogoutRequestSignatureValidation.make();
     private final ObjectFactory objectFactory = new ObjectFactory();
 
     @Inject
@@ -59,7 +59,7 @@ public class LocalLogoutService implements MockbusterLogoutService {
     }
 
     @Override
-    public void logout(String serviceRequest, ServiceResponse serviceResponse) {
+    public void logout(String serviceRequest, ServiceRequestTicket serviceRequestTicket) {
         LOG.info("LogoutRequest received");
         try {
             LogoutRequestType logoutRequestType = Saml2ProtocolObjects.unmarshal(serviceRequest, LogoutRequestType.class);
@@ -73,32 +73,32 @@ public class LocalLogoutService implements MockbusterLogoutService {
                         objectFactory.createLogoutRequest(logoutRequestType)
                 );
 
-                SamlRequestValidationResult validationResult = new LogoutValidation().validateRequest(logoutRequestType);
+                SamlRequestValidationResult validationResult = new LogoutRequestValidation(identityProvider, serviceProvider).validateRequest(logoutRequestType);
 
                 if (validationResult.isValid()) {
                     List<X509Certificate> certificateList = X509Certificates.gatherCertificates(serviceProvider.getCertificates());
 
                     if (signatureValidator.validateSignature(document, certificateList, true)) {
-                        eventBus.publish(new LogoutRequestReceived(logoutRequestType, serviceResponse));
+                        eventBus.publish(new LogoutRequestReceived(logoutRequestType, serviceRequestTicket));
                     } else {
                         LOG.info("invalid or non existing signature; LogoutRequest with ID {} will be denied", logoutRequestType.getID());
-                        eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse, SamlResponseStatus.REQUEST_DENIED));
+                        eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceRequestTicket, SamlResponseStatus.REQUEST_DENIED));
                     }
                 } else {
                     LOG.info("LogoutRequest with ID {} cannot be validated: {}",
                             logoutRequestType.getID(), validationResult.getErrorMessages()
                     );
-                    eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse, SamlResponseStatus.REQUEST_DENIED));
+                    eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceRequestTicket, SamlResponseStatus.REQUEST_DENIED));
                 }
 
             } else {
                 LOG.info("service provider not found or unknown; LogoutRequest with ID {} will be denied", logoutRequestType.getID());
-                eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse, SamlResponseStatus.REQUEST_DENIED));
+                eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceRequestTicket, SamlResponseStatus.REQUEST_DENIED));
             }
 
         } catch (JAXBException e) {
             LOG.info("cannot parse LogoutRequest", e);
-            serviceResponse.sendInvalidRequest();
+            serviceRequestTicket.sendInvalidRequest();
         }
 
     }

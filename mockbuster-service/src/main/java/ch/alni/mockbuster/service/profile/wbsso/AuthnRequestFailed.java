@@ -18,20 +18,33 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.core.domain.AssertionConsumerService;
+import ch.alni.mockbuster.core.domain.IdentityProvider;
+import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.saml2.SamlResponseStatus;
-import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.ServiceRequestTicket;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.AuthnRequestType;
 
 public class AuthnRequestFailed implements ServiceEvent {
 
     private final AuthnRequestType authnRequestType;
-    private final ServiceResponse serviceResponse;
+    private final IdentityProvider identityProvider;
+    private final ServiceProvider serviceProvider;
+    private final AssertionConsumerService returnDestination;
+    private final ServiceRequestTicket serviceRequestTicket;
     private final SamlResponseStatus responseStatus;
 
-    public AuthnRequestFailed(AuthnRequestType authnRequestType, ServiceResponse serviceResponse, SamlResponseStatus responseStatus) {
+    public AuthnRequestFailed(AuthnRequestType authnRequestType,
+                              IdentityProvider identityProvider,
+                              ServiceProvider serviceProvider, AssertionConsumerService returnDestination,
+                              ServiceRequestTicket serviceRequestTicket,
+                              SamlResponseStatus responseStatus) {
         this.authnRequestType = authnRequestType;
-        this.serviceResponse = serviceResponse;
+        this.identityProvider = identityProvider;
+        this.serviceProvider = serviceProvider;
+        this.returnDestination = returnDestination;
+        this.serviceRequestTicket = serviceRequestTicket;
         this.responseStatus = responseStatus;
     }
 
@@ -39,11 +52,23 @@ public class AuthnRequestFailed implements ServiceEvent {
         return authnRequestType;
     }
 
-    public ServiceResponse getServiceResponse() {
-        return serviceResponse;
+    public ServiceRequestTicket getServiceRequestTicket() {
+        return serviceRequestTicket;
     }
 
     public SamlResponseStatus getResponseStatus() {
         return responseStatus;
+    }
+
+    public IdentityProvider getIdentityProvider() {
+        return identityProvider;
+    }
+
+    public AssertionConsumerService getReturnDestination() {
+        return returnDestination;
+    }
+
+    public ServiceProvider getServiceProvider() {
+        return serviceProvider;
     }
 }

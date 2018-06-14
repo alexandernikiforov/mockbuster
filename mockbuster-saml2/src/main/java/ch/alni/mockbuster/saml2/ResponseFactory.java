@@ -16,16 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.profile.wbsso;
+package ch.alni.mockbuster.saml2;
 
-import ch.alni.mockbuster.core.domain.AssertionConsumerService;
-import ch.alni.mockbuster.core.domain.AssertionConsumerServices;
-import ch.alni.mockbuster.core.domain.Principal;
-import ch.alni.mockbuster.core.domain.ServiceProvider;
-import ch.alni.mockbuster.saml2.AttributeStatements;
-import ch.alni.mockbuster.saml2.SamlResponseStatus;
-import ch.alni.mockbuster.service.ServiceConfiguration;
-import ch.alni.mockbuster.service.session.Session;
+import org.apache.commons.lang.Validate;
 import org.oasis.saml2.assertion.*;
 import org.oasis.saml2.protocol.AuthnRequestType;
 import org.oasis.saml2.protocol.ResponseType;
@@ -34,49 +27,42 @@ import org.oasis.saml2.protocol.StatusType;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Response factory according to the rules of the Web Browser SSO profile.
  */
-class ResponseFactory {
+public final class ResponseFactory {
     private static final String SAML_VERSION = "2.0";
-    private final ObjectFactory assertionObjectFactory = new ObjectFactory();
-
-    private final ServiceConfiguration serviceConfiguration;
-
-    ResponseFactory(ServiceConfiguration serviceConfiguration) {
-        this.serviceConfiguration = serviceConfiguration;
-    }
+    private static final ObjectFactory assertionObjectFactory = new ObjectFactory();
 
     private static String createId() {
         return "_" + UUID.randomUUID().toString();
     }
 
-    ResponseType makeResponse(AuthnRequestType request, ServiceProvider serviceProvider, Principal principal, Session session) {
+    private ResponseFactory() {
+    }
 
-        final String requestId = request.getID();
-        final String responseIssuer = serviceConfiguration.getServiceId();
+    public static ResponseType makeResponse(ResponseTypeParams params) {
+        final AuthnRequestType authnRequestType = params.getAuthnRequestType();
+
+        final String requestId = authnRequestType.getID();
+        final String responseIssuer = params.getIdentityProviderId();
 
         // this must be present according to the profile rules
-        final String requestIssuerId = request.getIssuer().getValue();
+        final String requestIssuerId = authnRequestType.getIssuer().getValue();
 
         final Instant now = Instant.now();
-        final Instant deliveryNotOnOrAfter = now.plus(serviceConfiguration.getDeliveryValidityInSeconds(), ChronoUnit.SECONDS);
+        final Instant deliveryNotOnOrAfter = now.plus(params.getDeliveryValidityInSeconds(), ChronoUnit.SECONDS);
 
-        final Instant sessionNotOnOrAfter = serviceConfiguration.isSessionPermanent() ? null :
-                now.plus(serviceConfiguration.getSessionNotOnOrAfterInSeconds(), ChronoUnit.SECONDS);
+        final Instant sessionNotOnOrAfter = Optional.ofNullable(params.getSessionTimeoutInSeconds())
+                .map(timeout -> now.plus(timeout, ChronoUnit.SECONDS))
+                .orElse(null);
 
-        final String assertionConsumerServiceUrl = AssertionConsumerServices.findByUrlOrIndex(
-                serviceProvider.getAssertionConsumerServices(),
-                request.getAssertionConsumerServiceURL(),
-                request.getAssertionConsumerServiceIndex())
-                .map(AssertionConsumerService::getUrl)
-                .orElseThrow(() -> new IllegalArgumentException("either url or index should be provided"));
+        final AttributeStatementType attributeStatementType = params.getAttributeStatementType();
 
-        final AttributeStatementType attributeStatementType =
-                AttributeStatements.toAttributeStatementType(principal.getAttributeStatement());
-
+        final String assertionConsumerServiceUrl = params.getAssertionConsumerServiceUrl();
         return ResponseType.builder()
                 .withID(createId())
                 .withIssueInstant(now)
@@ -107,10 +93,7 @@ class ResponseFactory {
 
                         .withSubject(SubjectType.builder()
                                 .withContent(
-                                        assertionObjectFactory.createNameID(NameIDType.builder()
-                                                .withFormat(principal.getNameId().getNameIdFormat())
-                                                .withValue(principal.getNameId().getNameId())
-                                                .build()),
+                                        assertionObjectFactory.createNameID(params.getSubjectIdentityId()),
 
                                         assertionObjectFactory.createSubjectConfirmation(SubjectConfirmationType.builder()
                                                 .withMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer")
@@ -131,7 +114,7 @@ class ResponseFactory {
                         .addAuthnStatement(AuthnStatementType.builder()
                                 .withAuthnInstant(Instant.now())
                                 .withSessionNotOnOrAfter(sessionNotOnOrAfter)
-                                .withSessionIndex(session.getIndex())
+                                .withSessionIndex(params.getSessionIndex())
                                 .withAuthnContext(AuthnContextType.builder()
                                         .withContent(
                                                 assertionObjectFactory
@@ -146,9 +129,17 @@ class ResponseFactory {
                 .build();
     }
 
-    ResponseType makeResponse(AuthnRequestType request, SamlResponseStatus responseStatus) {
-        final String requestId = request.getID();
-        final String responseIssuer = serviceConfiguration.getServiceId();
+    /**
+     * Produces an error authn response with the given status. There are no assertions in the response.
+     */
+    public static ResponseType makeErrorResponse(ResponseTypeParams params, SamlResponseStatus responseStatus) {
+        final AuthnRequestType authnRequestType = params.getAuthnRequestType();
+        final String identityProviderId = params.getIdentityProviderId();
+
+        Validate.notNull(authnRequestType, "authnRequestType cannot be null");
+        Validate.notNull(identityProviderId, "identityProviderId cannot be null");
+
+        final String requestId = authnRequestType.getID();
         final Instant now = Instant.now();
 
         return ResponseType.builder()
@@ -160,7 +151,7 @@ class ResponseFactory {
                 // issuer
                 .withIssuer(NameIDType.builder()
                         .withFormat("urn:oasis:names:tc:SAML:2.0:nameid-format:entity")
-                        .withValue(responseIssuer)
+                        .withValue(identityProviderId)
                         .build())
 
                 // status

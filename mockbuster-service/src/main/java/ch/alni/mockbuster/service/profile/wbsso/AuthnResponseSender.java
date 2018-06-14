@@ -20,8 +20,7 @@ package ch.alni.mockbuster.service.profile.wbsso;
 
 import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.saml2.Saml2ProtocolObjects;
-import ch.alni.mockbuster.service.ServiceResponse;
-import ch.alni.mockbuster.signature.enveloped.EnvelopedSigner;
+import ch.alni.mockbuster.service.ServiceRequestTicket;
 import org.oasis.saml2.assertion.AssertionType;
 import org.oasis.saml2.protocol.ObjectFactory;
 import org.oasis.saml2.protocol.ResponseType;
@@ -30,7 +29,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
-import javax.inject.Inject;
 import javax.xml.bind.JAXBException;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -38,26 +36,21 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public class AuthnResponseSender {
     private static final Logger LOG = getLogger(AuthnResponseSender.class);
-    private final ResponseSigner responseSigner;
+    private final ResponseSigner responseSigner = new ResponseSigner();
     private final ObjectFactory objectFactory = new ObjectFactory();
-
-    @Inject
-    public AuthnResponseSender(EnvelopedSigner envelopedSigner) {
-        responseSigner = new ResponseSigner(envelopedSigner);
-    }
 
     @EventListener
     public void onAuthnResponse(AuthnResponsePrepared event) {
         ResponseType responseType = event.getResponseType();
         ServiceProvider serviceProvider = event.getServiceProvider();
-        ServiceResponse serviceResponse = event.getServiceResponse();
+        ServiceRequestTicket serviceRequestTicket = event.getServiceRequestTicket();
 
         try {
             Document document = Saml2ProtocolObjects.jaxbElementToDocument(
                     objectFactory.createResponse(responseType)
             );
 
-            if (null != serviceProvider && serviceProvider.isWantAssertionSigned()
+            if (serviceProvider.isWantAssertionSigned()
                     && !responseType.getAssertionOrEncryptedAssertion().isEmpty()) {
                 // sign assertions
                 int count = 1;

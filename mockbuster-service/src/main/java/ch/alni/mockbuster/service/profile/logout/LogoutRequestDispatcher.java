@@ -21,7 +21,7 @@ package ch.alni.mockbuster.service.profile.logout;
 import ch.alni.mockbuster.core.domain.Principal;
 import ch.alni.mockbuster.core.domain.PrincipalRepository;
 import ch.alni.mockbuster.saml2.SamlResponseStatus;
-import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.ServiceResponseCallback;
 import ch.alni.mockbuster.service.events.EventBus;
 import org.oasis.saml2.protocol.LogoutRequestType;
 import org.springframework.context.event.EventListener;
@@ -44,7 +44,7 @@ public class LogoutRequestDispatcher {
     @EventListener
     public void onLogoutRequestReceived(LogoutRequestReceived event) {
         LogoutRequestType logoutRequestType = event.getLogoutRequestType();
-        ServiceResponse serviceResponse = event.getServiceResponse();
+        ServiceResponseCallback serviceResponse = event.getServiceResponse();
 
         LogoutRequests.findNameId(logoutRequestType)
                 .flatMap(principalRepository::findByNameId)
@@ -53,12 +53,12 @@ public class LogoutRequestDispatcher {
                 .accept(serviceResponse);
     }
 
-    private Consumer<ServiceResponse> logout(Principal principal, LogoutRequestType logoutRequestType) {
+    private Consumer<ServiceResponseCallback> logout(Principal principal, LogoutRequestType logoutRequestType) {
         return serviceResponse ->
                 eventBus.publish(new LogoutRequestPrincipalIdentified(logoutRequestType, serviceResponse, principal));
     }
 
-    private Consumer<ServiceResponse> logoutWithPrincipalNotFound(LogoutRequestType logoutRequestType) {
+    private Consumer<ServiceResponseCallback> logoutWithPrincipalNotFound(LogoutRequestType logoutRequestType) {
         return serviceResponse -> eventBus.publish(new LogoutRequestDenied(logoutRequestType, serviceResponse,
                 SamlResponseStatus.UNKNOWN_PRINCIPAL));
     }

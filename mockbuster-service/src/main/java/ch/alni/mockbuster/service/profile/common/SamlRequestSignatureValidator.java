@@ -28,18 +28,16 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 public class SamlRequestSignatureValidator {
-    private final EnvelopedSignatureValidator validator = new EnvelopedSignatureValidator();
+    private final String pathToSignatureElement;
 
-    private final String signaturePath;
-
-    public SamlRequestSignatureValidator(String signaturePath) {
-        this.signaturePath = signaturePath;
+    public SamlRequestSignatureValidator(String pathToSignatureElement) {
+        this.pathToSignatureElement = pathToSignatureElement;
     }
 
-    public boolean validateSignature(Document authnRequestDocument, List<X509Certificate> certificateList, boolean wantRequestSigned) {
+    public final boolean validateSignature(Document requestDocument, List<X509Certificate> certificateList, boolean wantRequestSigned) {
         X509CertListBasedKeyFinder keyFinder = new X509CertListBasedKeyFinder(() -> certificateList);
 
-        SignatureValidationResult result = validator.validateXmlSignature(authnRequestDocument, signaturePath, keyFinder);
+        SignatureValidationResult result = EnvelopedSignatureValidator.validateXmlSignature(requestDocument, pathToSignatureElement, keyFinder);
 
         return SignatureValidationResults.isSignatureValid(result, wantRequestSigned);
     }

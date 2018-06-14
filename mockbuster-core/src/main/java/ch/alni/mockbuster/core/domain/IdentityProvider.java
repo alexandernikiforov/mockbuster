@@ -29,6 +29,9 @@ public class IdentityProvider {
 
     private String nameIdPolicyFormat;
 
+    private long deliveryValidityInSeconds;
+
+
     public IdentityProvider() {
         id = UUID.randomUUID().toString();
     }
@@ -52,4 +55,7 @@ public class IdentityProvider {
         return nameIdPolicyFormat;
     }
 
+    public long getDeliveryValidityInSeconds() {
+        return deliveryValidityInSeconds;
+    }
 }

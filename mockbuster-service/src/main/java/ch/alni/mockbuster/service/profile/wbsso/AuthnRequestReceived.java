@@ -18,8 +18,10 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.core.domain.AssertionConsumerService;
+import ch.alni.mockbuster.core.domain.IdentityProvider;
 import ch.alni.mockbuster.core.domain.ServiceProvider;
-import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.ServiceRequestTicket;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.AuthnRequestType;
 
@@ -28,13 +30,21 @@ import org.oasis.saml2.protocol.AuthnRequestType;
  */
 public class AuthnRequestReceived implements ServiceEvent {
     private final AuthnRequestType authnRequest;
+    private final IdentityProvider identityProvider;
     private final ServiceProvider serviceProvider;
-    private final ServiceResponse serviceResponse;
+    private final AssertionConsumerService returnDestination;
+    private final ServiceRequestTicket serviceRequestTicket;
 
-    public AuthnRequestReceived(AuthnRequestType authnRequest, ServiceProvider serviceProvider, ServiceResponse serviceResponse) {
+    public AuthnRequestReceived(AuthnRequestType authnRequest,
+                                IdentityProvider identityProvider,
+                                ServiceProvider serviceProvider,
+                                AssertionConsumerService returnDestination,
+                                ServiceRequestTicket serviceRequestTicket) {
         this.authnRequest = authnRequest;
+        this.identityProvider = identityProvider;
         this.serviceProvider = serviceProvider;
-        this.serviceResponse = serviceResponse;
+        this.returnDestination = returnDestination;
+        this.serviceRequestTicket = serviceRequestTicket;
     }
 
     public ServiceProvider getServiceProvider() {
@@ -45,7 +55,15 @@ public class AuthnRequestReceived implements ServiceEvent {
         return authnRequest;
     }
 
-    public ServiceResponse getServiceResponse() {
-        return serviceResponse;
+    public ServiceRequestTicket getServiceRequestTicket() {
+        return serviceRequestTicket;
+    }
+
+    public IdentityProvider getIdentityProvider() {
+        return identityProvider;
+    }
+
+    public AssertionConsumerService getReturnDestination() {
+        return returnDestination;
     }
 }

@@ -18,7 +18,7 @@
 
 package ch.alni.mockbuster.service.profile.logout;
 
-import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.ServiceResponseCallback;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.LogoutRequestType;
 
@@ -28,9 +28,9 @@ import org.oasis.saml2.protocol.LogoutRequestType;
 public class LogoutRequestReceived implements ServiceEvent {
 
     private final LogoutRequestType logoutRequestType;
-    private final ServiceResponse serviceResponse;
+    private final ServiceResponseCallback serviceResponse;
 
-    public LogoutRequestReceived(LogoutRequestType logoutRequestType, ServiceResponse serviceResponse) {
+    public LogoutRequestReceived(LogoutRequestType logoutRequestType, ServiceResponseCallback serviceResponse) {
         this.logoutRequestType = logoutRequestType;
         this.serviceResponse = serviceResponse;
     }
@@ -39,7 +39,7 @@ public class LogoutRequestReceived implements ServiceEvent {
         return logoutRequestType;
     }
 
-    public ServiceResponse getServiceResponse() {
+    public ServiceResponseCallback getServiceResponse() {
         return serviceResponse;
     }
 }

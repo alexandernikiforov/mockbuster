@@ -21,13 +21,18 @@ package ch.alni.mockbuster.service.session;
 import ch.alni.mockbuster.core.domain.NameId;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface SessionRepository {
 
     Session getCurrentSession();
 
-    Optional<Session> findSessionByIndex(String index);
+    void removePrincipalFromAllSessions(NameId nameId);
 
-    List<Session> findAllSessionsForPrincipal(NameId nameId);
+    /**
+     * Removes the prinicpal info from the sessions identified by the indices in the provided list.
+     *
+     * @param nameId           identity ID of the principal
+     * @param sessionIndexList list of session indices
+     */
+    void removePrincipalFromSessions(NameId nameId, List<String> sessionIndexList);
 }

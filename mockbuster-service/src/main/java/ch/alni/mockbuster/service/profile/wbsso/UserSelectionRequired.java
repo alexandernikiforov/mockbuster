@@ -18,27 +18,19 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
-import ch.alni.mockbuster.service.ServiceResponse;
 import ch.alni.mockbuster.service.events.ServiceEvent;
-import org.oasis.saml2.protocol.AuthnRequestType;
 
 /**
  * Is triggered when user interaction is required to establish the current identity.
  */
-public class UserInteractionRequired implements ServiceEvent {
-    private final AuthnRequestType authnRequest;
-    private final ServiceResponse serviceResponse;
+public class UserSelectionRequired implements ServiceEvent {
+    private final AuthnRequestValidated authnRequestValidatedEvent;
 
-    public UserInteractionRequired(AuthnRequestType authnRequest, ServiceResponse serviceResponse) {
-        this.authnRequest = authnRequest;
-        this.serviceResponse = serviceResponse;
+    public UserSelectionRequired(AuthnRequestValidated authnRequestValidatedEvent) {
+        this.authnRequestValidatedEvent = authnRequestValidatedEvent;
     }
 
-    public AuthnRequestType getAuthnRequestType() {
-        return authnRequest;
-    }
-
-    public ServiceResponse getServiceResponse() {
-        return serviceResponse;
+    public AuthnRequestValidated getAuthnRequestValidatedEvent() {
+        return authnRequestValidatedEvent;
     }
 }

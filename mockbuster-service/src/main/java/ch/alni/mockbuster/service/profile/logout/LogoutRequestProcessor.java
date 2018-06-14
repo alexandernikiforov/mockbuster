@@ -20,9 +20,10 @@ package ch.alni.mockbuster.service.profile.logout;
 
 
 import ch.alni.mockbuster.core.domain.Principal;
+import ch.alni.mockbuster.saml2.LogoutResponseFactory;
 import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.ServiceConfiguration;
-import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.ServiceResponseCallback;
 import ch.alni.mockbuster.service.events.EventBus;
 import ch.alni.mockbuster.service.session.Session;
 import ch.alni.mockbuster.service.session.SessionRepository;
@@ -53,7 +54,7 @@ public class LogoutRequestProcessor {
     @EventListener
     public void onLogoutRequestDenied(LogoutRequestDenied event) {
         LogoutRequestType logoutRequestType = event.getLogoutRequestType();
-        ServiceResponse serviceResponse = event.getServiceResponse();
+        ServiceResponseCallback serviceResponse = event.getServiceResponse();
 
         StatusResponseType statusResponseType = logoutResponseFactory.makeStatusResponse(logoutRequestType,
                 SamlResponseStatus.REQUEST_DENIED);
@@ -64,7 +65,7 @@ public class LogoutRequestProcessor {
     @EventListener
     public void onLogoutRequestPrincipalIdentified(LogoutRequestPrincipalIdentified event) {
         LogoutRequestType logoutRequestType = event.getLogoutRequestType();
-        ServiceResponse serviceResponse = event.getServiceResponse();
+        ServiceResponseCallback serviceResponse = event.getServiceResponse();
         Principal principal = event.getPrincipal();
 
         sessionRepository.findAllSessionsForPrincipal(principal.getNameId()).forEach(Session::clearIdentity);

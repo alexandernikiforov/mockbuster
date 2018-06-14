@@ -19,7 +19,6 @@
 package ch.alni.mockbuster.signature.enveloped;
 
 import ch.alni.mockbuster.signature.SignatureConfiguration;
-import ch.alni.mockbuster.signature.SignatureLocation;
 import ch.alni.mockbuster.signature.SignatureValidationResult;
 import ch.alni.mockbuster.signature.dom.Documents;
 import ch.alni.mockbuster.signature.pkix.X509CertListBasedKeyFinder;
@@ -45,7 +44,7 @@ public class EnvelopedSignerTest {
     private static final Logger LOG = getLogger(EnvelopedSignerTest.class);
 
     private EnvelopedSigner envelopedSigner;
-    private EnvelopedSignatureValidator envelopedSignatureValidator = new EnvelopedSignatureValidator();
+    private EnvelopedSignatureValidator envelopedSignatureValidator = new EnvelopedSignatureValidator(pathToSignatureElement);
     private X509CertListBasedKeyFinder keyFinder;
 
     @Before
@@ -85,7 +84,7 @@ public class EnvelopedSignerTest {
         keyFinder = new X509CertListBasedKeyFinder(() -> certificateList);
 
         // validate against the same certificate as while signing
-        envelopedSignatureValidator = new EnvelopedSignatureValidator();
+        envelopedSignatureValidator = new EnvelopedSignatureValidator(pathToSignatureElement);
     }
 
     @Test

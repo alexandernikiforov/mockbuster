@@ -43,8 +43,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * Validates enveloped XML signatures.
  */
-public class EnvelopedSignatureValidator {
+public final class EnvelopedSignatureValidator {
     private static final Logger LOG = getLogger(EnvelopedSignatureValidator.class);
+
+    /**
+     *
+     */
+    private EnvelopedSignatureValidator() {
+    }
 
     /**
      * Validates signature in the given element.
@@ -54,15 +60,15 @@ public class EnvelopedSignatureValidator {
      * @param keyFinder              how to map keyInfo to the validating key
      * @return true if the signature is valid or false otherwise
      */
-    public SignatureValidationResult validateXmlSignature(Document document,
-                                                          String pathToSignatureElement,
-                                                          Function<KeyInfo, Optional<Key>> keyFinder) {
+    public static SignatureValidationResult validateXmlSignature(Document document,
+                                                                 String pathToSignatureElement,
+                                                                 Function<KeyInfo, Optional<Key>> keyFinder) {
         return NodeFinder.findNode(document, pathToSignatureElement)
                 .map(signatureNode -> validateSignatureNode(signatureNode, keyFinder))
                 .orElseGet(SignatureValidationResultFactory::makeNotFound);
     }
 
-    private SignatureValidationResult validateSignatureNode(Node signatureNode, Function<KeyInfo, Optional<Key>> keyFinder) {
+    private static SignatureValidationResult validateSignatureNode(Node signatureNode, Function<KeyInfo, Optional<Key>> keyFinder) {
         KeySelector keySelector = getKeySelector(keyFinder);
 
         DOMValidateContext validateContext = new DOMValidateContext(keySelector, signatureNode);
@@ -92,13 +98,13 @@ public class EnvelopedSignatureValidator {
         }
     }
 
-    private boolean validateSignatureValue(DOMValidateContext validateContext, XMLSignature signature) throws XMLSignatureException {
+    private static boolean validateSignatureValue(DOMValidateContext validateContext, XMLSignature signature) throws XMLSignatureException {
         boolean signatureValueValid = signature.getSignatureValue().validate(validateContext);
         LOG.debug("signature value cryptographically valid: {}", signatureValueValid);
         return signatureValueValid;
     }
 
-    private List<String> validateReferences(DOMValidateContext validateContext, XMLSignature signature) throws XMLSignatureException {
+    private static List<String> validateReferences(DOMValidateContext validateContext, XMLSignature signature) throws XMLSignatureException {
         List<String> result = new ArrayList<>();
         for (Object reference : signature.getSignedInfo().getReferences()) {
             Reference ref = (Reference) reference;
@@ -112,7 +118,7 @@ public class EnvelopedSignatureValidator {
         return result;
     }
 
-    private KeySelector getKeySelector(Function<KeyInfo, Optional<Key>> keyFinder) {
+    private static KeySelector getKeySelector(Function<KeyInfo, Optional<Key>> keyFinder) {
         return new KeySelector() {
             @Override
             public KeySelectorResult select(KeyInfo keyInfo, Purpose purpose, AlgorithmMethod method, XMLCryptoContext context) throws KeySelectorException {

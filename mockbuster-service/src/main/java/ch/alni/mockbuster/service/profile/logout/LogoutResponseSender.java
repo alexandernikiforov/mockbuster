@@ -20,7 +20,7 @@ package ch.alni.mockbuster.service.profile.logout;
 
 import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
 import ch.alni.mockbuster.saml2.Saml2ProtocolObjects;
-import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.ServiceResponseCallback;
 import ch.alni.mockbuster.signature.enveloped.EnvelopedSigner;
 import org.oasis.saml2.protocol.StatusResponseType;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class LogoutResponseSender {
     @EventListener
     public void onLogoutResponsePrepared(LogoutResponsePrepared event) {
         StatusResponseType statusResponseType = event.getStatusResponseType();
-        ServiceResponse serviceResponse = event.getServiceResponse();
+        ServiceResponseCallback serviceResponse = event.getServiceResponse();
 
         try {
             JAXBElement<StatusResponseType> logoutResponse = new JAXBElement<>(

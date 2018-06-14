@@ -18,23 +18,26 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.service.ServiceRequestTicket;
+import ch.alni.mockbuster.service.events.ServiceEvent;
 
-import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
-import ch.alni.mockbuster.service.profile.common.SamlRequestSignatureValidator;
-import ch.alni.mockbuster.signature.xpath.XPaths;
+/**
+ * Published when the incoming authn request could not be parsed.
+ */
+public class AuthnRequestNotUnderstood implements ServiceEvent {
+    private final String serviceRequest;
+    private final ServiceRequestTicket serviceRequestTicket;
 
-import javax.xml.namespace.QName;
-
-final class AuthnRequestSignatureValidatorFactory {
-    private final static String SIGNATURE_PATH = XPaths.toAbsolutePath(
-            new QName(Saml2NamespaceUri.SAML2_PROTOCOL_NAMESPACE_URI, "AuthnRequest"),
-            new QName(Saml2NamespaceUri.XMLSIG_CORE_NAMESPACE_URI, "Signature")
-    );
-
-    private AuthnRequestSignatureValidatorFactory() {
+    public AuthnRequestNotUnderstood(String serviceRequest, ServiceRequestTicket serviceRequestTicket) {
+        this.serviceRequest = serviceRequest;
+        this.serviceRequestTicket = serviceRequestTicket;
     }
 
-    static SamlRequestSignatureValidator make() {
-        return new SamlRequestSignatureValidator(SIGNATURE_PATH);
+    public String getServiceRequest() {
+        return serviceRequest;
+    }
+
+    public ServiceRequestTicket getServiceRequestTicket() {
+        return serviceRequestTicket;
     }
 }

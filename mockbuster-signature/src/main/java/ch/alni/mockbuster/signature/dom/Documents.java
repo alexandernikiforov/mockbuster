@@ -38,20 +38,6 @@ import java.io.StringWriter;
  * Utility class to work with DOM and strings.
  */
 public final class Documents {
-    // reusing dom builder for within a single thread's context
-    private static final ThreadLocal<DocumentBuilder> documentBuilderThreadLocal =
-            ThreadLocal.withInitial(() -> {
-                DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-                documentBuilderFactory.setNamespaceAware(true);
-
-                try {
-                    return documentBuilderFactory.newDocumentBuilder();
-                } catch (ParserConfigurationException e) {
-                    throw new IllegalStateException("cannot create a dom builder", e);
-                }
-            });
-    private static final ThreadLocal<TransformerFactory> transformerFactoryLocal =
-            ThreadLocal.withInitial(TransformerFactory::newInstance);
 
     private Documents() {
     }
@@ -60,18 +46,20 @@ public final class Documents {
      * Creates a new document.
      */
     public static Document createNewDocument() {
-        DocumentBuilder documentBuilder = Documents.documentBuilderThreadLocal.get();
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(true);
 
         try {
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+
             return documentBuilder.newDocument();
-        } finally {
-            // important
-            documentBuilder.reset();
+        } catch (ParserConfigurationException e) {
+            throw new IllegalStateException(e);
         }
     }
 
     public static Document toDocument(String xml) throws TransformerException {
-        TransformerFactory transformerFactory = transformerFactoryLocal.get();
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
         StreamSource source = new StreamSource(new StringReader(xml));
         DOMResult result = new DOMResult(createNewDocument());
 
@@ -86,7 +74,7 @@ public final class Documents {
      * Transforms this DOM representation to string.
      */
     public static String toString(Document document) throws TransformerException {
-        TransformerFactory transformerFactory = transformerFactoryLocal.get();
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
         DOMSource source = new DOMSource(document);
 
         StringWriter writer = new StringWriter();

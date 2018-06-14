@@ -23,5 +23,5 @@ package ch.alni.mockbuster.service;
  */
 public interface MockbusterLogoutService {
 
-    void logout(String serviceRequest, ServiceResponse serviceResponse);
+    void logout(String serviceRequest, ServiceRequestTicket serviceRequestTicket);
 }

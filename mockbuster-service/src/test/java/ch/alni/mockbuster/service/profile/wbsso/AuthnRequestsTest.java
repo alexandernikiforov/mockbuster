@@ -19,6 +19,7 @@
 package ch.alni.mockbuster.service.profile.wbsso;
 
 import ch.alni.mockbuster.core.domain.NameId;
+import ch.alni.mockbuster.saml2.AuthnRequests;
 import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
 import org.junit.Test;
 import org.oasis.saml2.assertion.NameIDType;

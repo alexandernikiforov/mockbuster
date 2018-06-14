@@ -16,26 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service;
+package ch.alni.mockbuster.service.messages;
 
-/**
- * Request to the service.
- */
-public class ServiceRequest {
-    private final String request;
+public interface SamlRequest {
 
-    private final String relayState;
+    /**
+     * Original service request.
+     */
+    ServiceRequest getServiceRequest();
 
-    public ServiceRequest(String request, String relayState) {
-        this.request = request;
-        this.relayState = relayState;
-    }
-
-    public String getRequest() {
-        return request;
-    }
-
-    public String getRelayState() {
-        return relayState;
-    }
+    void accept(SamlRequestVisitor visitor);
 }

@@ -20,33 +20,16 @@ package ch.alni.mockbuster.core.domain;
 
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
- * Functions around AssertionConsumerService
+ * Predicate functions around AssertionConsumerService.
  */
-public final class AssertionConsumerServices {
-    private AssertionConsumerServices() {
+public final class AssertionConsumerServicePredicates {
+    private AssertionConsumerServicePredicates() {
     }
 
-    public static boolean containsAssertionServiceUrl(Stream<AssertionConsumerService> assertionConsumerServices,
-                                                      String assertionServiceUrl) {
-        return assertionConsumerServices.anyMatch(byUrl(assertionServiceUrl));
-    }
-
-    public static boolean containsAssertionServiceIndex(Stream<AssertionConsumerService> assertionConsumerServices,
-                                                        int assertionServiceIndex) {
-        return assertionConsumerServices.anyMatch(byIndex(assertionServiceIndex));
-    }
-
-    public static Optional<AssertionConsumerService> findByUrlOrIndex(Stream<AssertionConsumerService> assertionConsumerServices,
-                                                                      String assertionServiceUrl, int assertionServiceIndex) {
-        return assertionConsumerServices.filter(byUrl(assertionServiceUrl).or(byIndex(assertionServiceIndex))).findFirst();
-    }
-
-    private static Predicate<AssertionConsumerService> byUrl(String assertionServiceUrl) {
+    public static Predicate<AssertionConsumerService> hasSameUrl(String assertionServiceUrl) {
         if (null == assertionServiceUrl) {
             return assertionConsumerService -> false;
         } else {
@@ -54,7 +37,7 @@ public final class AssertionConsumerServices {
         }
     }
 
-    private static Predicate<AssertionConsumerService> byIndex(Integer assertionServiceIndex) {
+    public static Predicate<AssertionConsumerService> hasSameIndex(Integer assertionServiceIndex) {
         if (null == assertionServiceIndex) {
             return assertionConsumerService -> false;
         } else {

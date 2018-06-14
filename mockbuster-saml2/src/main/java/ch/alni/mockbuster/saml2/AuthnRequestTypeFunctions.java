@@ -16,33 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.profile.wbsso;
+package ch.alni.mockbuster.saml2;
 
-import ch.alni.mockbuster.core.domain.NameId;
-import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
 import org.oasis.saml2.assertion.NameIDType;
-import org.oasis.saml2.assertion.SubjectType;
 import org.oasis.saml2.protocol.AuthnRequestType;
 
 import javax.xml.namespace.QName;
 import java.util.Optional;
 
-final class AuthnRequests {
+/**
+ * Functions to work with AuthnRequestType.
+ */
+public final class AuthnRequestTypeFunctions {
 
-    private AuthnRequests() {
+    private AuthnRequestTypeFunctions() {
     }
 
-    static Optional<NameId> getSubjectIdentity(AuthnRequestType authnRequestType) {
+    public static Optional<NameIDType> findSubjectIdentity(AuthnRequestType authnRequestType) {
         return Optional.ofNullable(authnRequestType.getSubject())
-                .flatMap(AuthnRequests::findNameIDType)
-                .map(nameIDType -> new NameId(nameIDType.getFormat(), nameIDType.getValue()));
-    }
-
-    private static Optional<NameIDType> findNameIDType(SubjectType subjectType) {
-        return subjectType.getContent().stream()
-                .filter(jaxbElement -> jaxbElement.getName()
-                        .equals(new QName(Saml2NamespaceUri.SAML2_ASSERTION_NAMESPACE_URI, "NameID")))
-                .map(jaxbElement -> (NameIDType) jaxbElement.getValue())
-                .findFirst();
+                .flatMap(subjectType -> subjectType.getContent().stream()
+                        .filter(jaxbElement -> jaxbElement.getName()
+                                .equals(new QName(Saml2NamespaceUri.SAML2_ASSERTION_NAMESPACE_URI, "NameID")))
+                        .map(jaxbElement -> (NameIDType) jaxbElement.getValue())
+                        .findFirst());
     }
 }

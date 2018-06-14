@@ -16,25 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.profile.logout;
+package ch.alni.mockbuster.service.messages;
 
+/**
+ * Request for authentication.
+ */
+public class AuthnServiceRequest implements ServiceRequest {
 
-import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
-import ch.alni.mockbuster.service.profile.common.SamlRequestSignatureValidator;
-import ch.alni.mockbuster.signature.xpath.XPaths;
+    private final String request;
 
-import javax.xml.namespace.QName;
-
-class LogoutRequestSignatureValidatorFactory {
-    private final static String SIGNATURE_PATH = XPaths.toAbsolutePath(
-            new QName(Saml2NamespaceUri.SAML2_PROTOCOL_NAMESPACE_URI, "LogoutRequest"),
-            new QName(Saml2NamespaceUri.XMLSIG_CORE_NAMESPACE_URI, "Signature")
-    );
-
-    private LogoutRequestSignatureValidatorFactory() {
+    public AuthnServiceRequest(String request) {
+        this.request = request;
     }
 
-    static SamlRequestSignatureValidator make() {
-        return new SamlRequestSignatureValidator(SIGNATURE_PATH);
+    @Override
+    public String getRequest() {
+        return request;
+    }
+
+    @Override
+    public void accept(ServiceRequestVisitor visitor) {
+        visitor.visit(this);
     }
 }

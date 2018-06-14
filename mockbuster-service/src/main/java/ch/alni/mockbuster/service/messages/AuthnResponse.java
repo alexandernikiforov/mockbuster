@@ -16,31 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.signature;
+package ch.alni.mockbuster.service.messages;
 
-/**
- * Strategy to find the signature in the document.
- */
-public class SignatureLocation {
+import org.oasis.saml2.protocol.ResponseType;
 
-    private final String pathToParentNode;
-    private final String pathToNextSiblingNode;
+public class AuthnResponse implements SamlResponse {
+    private final ResponseType responseType;
 
-    public SignatureLocation(String pathToParentNode, String pathToNextSiblingNode) {
-        this.pathToParentNode = pathToParentNode;
-        this.pathToNextSiblingNode = pathToNextSiblingNode;
+    public AuthnResponse(ResponseType responseType) {
+        this.responseType = responseType;
     }
 
-    public SignatureLocation(String pathToParentNode) {
-        this.pathToParentNode = pathToParentNode;
-        this.pathToNextSiblingNode = null;
+    public ResponseType getResponseType() {
+        return responseType;
     }
 
-    public String getPathToParentNode() {
-        return pathToParentNode;
-    }
-
-    public String getPathToNextSiblingNode() {
-        return pathToNextSiblingNode;
+    @Override
+    public void accept(SamlResponseVisitor visitor) {
+        visitor.visit(this);
     }
 }

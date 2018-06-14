@@ -21,11 +21,11 @@ package ch.alni.mockbuster.service;
 /**
  * Interface for the service response.
  */
-public interface ServiceResponse {
+public interface ServiceResponseCallback {
 
     void sendUserInteractionRequired();
 
-    void sendResponse(String destination, String encodedSamlResponse);
+    void sendResponse(String destination, String samlResponse);
 
     void sendInvalidRequest();
 }

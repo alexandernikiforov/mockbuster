@@ -19,14 +19,15 @@
 package ch.alni.mockbuster.service.profile.wbsso;
 
 import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
-import ch.alni.mockbuster.signature.SignatureLocation;
 import ch.alni.mockbuster.signature.enveloped.EnvelopedSigner;
+import ch.alni.mockbuster.signature.enveloped.SignatureLocation;
 import ch.alni.mockbuster.signature.xpath.XPaths;
 import org.w3c.dom.Document;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
+import java.security.KeyStore;
 import java.text.MessageFormat;
+import java.util.function.Supplier;
 
 
 class ResponseSigner {
@@ -52,17 +53,17 @@ class ResponseSigner {
             + XPaths.toAbsolutePath(new QName(Saml2NamespaceUri.SAML2_ASSERTION_NAMESPACE_URI, "Issuer"))
             + "/following-sibling::*[position() = 1]";
 
-    private final EnvelopedSigner envelopedSigner;
 
-    ResponseSigner(EnvelopedSigner envelopedSigner) {
-        this.envelopedSigner = envelopedSigner;
+    ResponseSigner() {
     }
 
-    void signResponse(Document responseDocument) {
+    void signResponse(Document responseDocument, Supplier<KeyStore.PrivateKeyEntry> keyEntrySupplier) {
         // sign the response itself
-        envelopedSigner.sign(responseDocument,
+        EnvelopedSigner.sign(
+                responseDocument,
                 RESPONSE_NODE_PATH,
-                new SignatureLocation(RESPONSE_NODE_PATH, RESPONSE_NEXT_SIBLING_PATH));
+                new SignatureLocation(RESPONSE_NODE_PATH, RESPONSE_NEXT_SIBLING_PATH),
+                null);
     }
 
     /**
@@ -70,13 +71,16 @@ class ResponseSigner {
      *
      * @param responseDocument the basis document
      * @param index            index of the assertion (beginning with 1)
-     * @throws JAXBException
      */
-    void signAssertion(Document responseDocument, int index) {
+    void signAssertion(Document responseDocument, Supplier<KeyStore.PrivateKeyEntry> keyEntrySupplier, int index) {
         final String assertionNodePath = MessageFormat.format(ASSERTION_NODE_PATH_TEMPLATE, index);
         final String assertionNextSiblingPath = MessageFormat.format(ASSERTION_NEXT_SIBLING_PATH_TEMPLATE, index);
 
-        envelopedSigner.sign(responseDocument, assertionNodePath, new SignatureLocation(assertionNodePath, assertionNextSiblingPath));
+        EnvelopedSigner.sign(
+                responseDocument,
+                assertionNodePath,
+                new SignatureLocation(assertionNodePath, assertionNextSiblingPath),
+                null);
     }
 
 }

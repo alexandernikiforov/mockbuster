@@ -18,33 +18,44 @@
 
 package ch.alni.mockbuster.service.profile.logout;
 
+import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.saml2.SamlResponseStatus;
 import ch.alni.mockbuster.service.profile.validation.SamlRequestValidationResult;
 import ch.alni.mockbuster.service.profile.validation.SamlRequestValidator;
 import org.oasis.saml2.protocol.LogoutRequestType;
 
-import java.util.Collections;
+import java.util.Arrays;
 
 import static ch.alni.mockbuster.service.profile.validation.SamlRequestValidationResultFactory.makeInvalid;
 import static ch.alni.mockbuster.service.profile.validation.SamlRequestValidationResultFactory.makeValid;
 
-public class LogoutValidation {
+public class LogoutRequestValidation {
 
-    private final SamlRequestValidator<LogoutRequestType> validator =
-            new SamlRequestValidator<>(Collections.singletonList(this::validateSessionIndex));
+    private final SamlRequestValidator<LogoutRequestType> validator;
+
+
+    public LogoutRequestValidation(ServiceProvider serviceProvider) {
+        LogoutRequestSignatureValidation signatureValidation = new LogoutRequestSignatureValidation(serviceProvider);
+
+        validator = new SamlRequestValidator<>(Arrays.asList(
+                this::validateIdentity, signatureValidation::validateSignature
+        ));
+    }
 
     public SamlRequestValidationResult validateRequest(LogoutRequestType logoutRequestType) {
         return validator.validate(logoutRequestType);
     }
 
-    private SamlRequestValidationResult validateSessionIndex(LogoutRequestType logoutRequestType) {
-        if (logoutRequestType.getSessionIndex().isEmpty()) {
+    private SamlRequestValidationResult validateIdentity(LogoutRequestType logoutRequestType) {
+        if (null == logoutRequestType.getNameID()) {
             return makeInvalid(
-                    "request MUST include at least one <SessionIndex> element",
+                    "nameID element of the principal MUST be provided to establish the principal's identity",
                     SamlResponseStatus.REQUEST_DENIED
             );
         } else {
             return makeValid();
         }
     }
+
+
 }

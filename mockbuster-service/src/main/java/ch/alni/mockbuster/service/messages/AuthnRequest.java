@@ -16,46 +16,49 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.profile.wbsso;
+package ch.alni.mockbuster.service.messages;
 
-import ch.alni.mockbuster.core.domain.Principal;
+import ch.alni.mockbuster.core.domain.IdentityProvider;
 import ch.alni.mockbuster.core.domain.ServiceProvider;
-import ch.alni.mockbuster.service.ServiceResponse;
-import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.AuthnRequestType;
 
 /**
- * Is triggered when a authn request fails.
+ * Authentication request containing parsed SAML request object.
  */
-public class AuthnRequestAuthenticated implements ServiceEvent {
-    private final AuthnRequestType authnRequest;
-    private final ServiceProvider serviceProvider;
-    private final Principal principal;
-    private final ServiceResponse serviceResponse;
+public class AuthnRequest implements SamlRequest {
 
-    AuthnRequestAuthenticated(AuthnRequestType authnRequest,
-                              ServiceProvider serviceProvider,
-                              Principal principal,
-                              ServiceResponse serviceResponse) {
-        this.authnRequest = authnRequest;
+    private final ServiceRequest request;
+    private final AuthnRequestType authnRequestType;
+    private final ServiceProvider serviceProvider;
+    private final IdentityProvider identityProvider;
+
+    public AuthnRequest(ServiceRequest request, AuthnRequestType authnRequestType, ServiceProvider serviceProvider, IdentityProvider identityProvider) {
+        this.request = request;
+        this.authnRequestType = authnRequestType;
         this.serviceProvider = serviceProvider;
-        this.principal = principal;
-        this.serviceResponse = serviceResponse;
+        this.identityProvider = identityProvider;
+    }
+
+    public AuthnRequestType getAuthnRequestType() {
+        return authnRequestType;
     }
 
     public ServiceProvider getServiceProvider() {
         return serviceProvider;
     }
 
-    AuthnRequestType getAuthnRequest() {
-        return authnRequest;
+    public IdentityProvider getIdentityProvider() {
+        return identityProvider;
     }
 
-    public ServiceResponse getServiceResponse() {
-        return serviceResponse;
+    @Override
+    public ServiceRequest getServiceRequest() {
+        return request;
     }
 
-    Principal getPrincipal() {
-        return principal;
+    @Override
+    public void accept(SamlRequestVisitor visitor) {
+        visitor.visit(this);
     }
+
 }

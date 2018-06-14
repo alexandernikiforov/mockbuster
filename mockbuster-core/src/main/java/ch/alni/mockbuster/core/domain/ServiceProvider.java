@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public class ServiceProvider {
     private String id;
@@ -62,8 +61,8 @@ public class ServiceProvider {
         return displayName;
     }
 
-    public Stream<AssertionConsumerService> getAssertionConsumerServices() {
-        return assertionConsumerServiceList.stream();
+    public List<AssertionConsumerService> getAssertionConsumerServices() {
+        return Collections.unmodifiableList(assertionConsumerServiceList);
     }
 
     public List<String> getCertificates() {

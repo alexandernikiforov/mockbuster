@@ -26,5 +26,5 @@ public interface MockbusterSsoService {
     /**
      * Authenticates the user.
      */
-    void authenticate(String serviceRequest, ServiceResponse serviceResponse);
+    void authenticate(String serviceRequest, ServiceRequestTicket serviceRequestTicket);
 }

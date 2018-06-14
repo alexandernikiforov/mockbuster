@@ -19,13 +19,14 @@
 package ch.alni.mockbuster.service.profile.logout;
 
 import ch.alni.mockbuster.saml2.Saml2NamespaceUri;
-import ch.alni.mockbuster.signature.SignatureLocation;
 import ch.alni.mockbuster.signature.enveloped.EnvelopedSigner;
+import ch.alni.mockbuster.signature.enveloped.SignatureLocation;
 import ch.alni.mockbuster.signature.xpath.XPaths;
 import org.w3c.dom.Document;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
+import java.security.KeyStore;
+import java.util.function.Supplier;
 
 
 public class LogoutResponseSigner {
@@ -39,16 +40,16 @@ public class LogoutResponseSigner {
             new QName(Saml2NamespaceUri.SAML2_ASSERTION_NAMESPACE_URI, "Issuer"))
             + "/following-sibling::*[position() = 1]";
 
-    private final EnvelopedSigner envelopedSigner;
-
-    public LogoutResponseSigner(EnvelopedSigner envelopedSigner) {
-        this.envelopedSigner = envelopedSigner;
+    public LogoutResponseSigner() {
     }
 
-    public void signResponse(Document responseDocument) throws JAXBException {
+    public void signResponse(Document responseDocument, Supplier<KeyStore.PrivateKeyEntry> keyEntrySupplier) {
         // sign the response itself
-        envelopedSigner.sign(responseDocument,
+        EnvelopedSigner.sign(
+                responseDocument,
                 RESPONSE_NODE_PATH,
-                new SignatureLocation(RESPONSE_NODE_PATH, RESPONSE_NEXT_SIBLING_PATH));
+                new SignatureLocation(RESPONSE_NODE_PATH, RESPONSE_NEXT_SIBLING_PATH),
+                null
+        );
     }
 }

@@ -16,36 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.profile.wbsso;
+package ch.alni.mockbuster.service.messages;
 
 import ch.alni.mockbuster.core.domain.Principal;
-import ch.alni.mockbuster.service.ServiceResponse;
-import ch.alni.mockbuster.service.events.ServiceEvent;
-import org.oasis.saml2.protocol.AuthnRequestType;
 
-/**
- * Is triggered when an existing principal should be re-authenticated.
- */
-public class PrincipalAuthenticationRequired implements ServiceEvent {
-    private final AuthnRequestType authnRequest;
+public class UserAuthenticationRequiredResponse implements ServiceResponse {
+    private final AuthnRequest authnRequest;
     private final Principal principal;
-    private final ServiceResponse serviceResponse;
 
-    public PrincipalAuthenticationRequired(AuthnRequestType authnRequest, Principal principal, ServiceResponse serviceResponse) {
+    public UserAuthenticationRequiredResponse(AuthnRequest authnRequest, Principal principal) {
         this.authnRequest = authnRequest;
         this.principal = principal;
-        this.serviceResponse = serviceResponse;
     }
 
-    public AuthnRequestType getAuthnRequest() {
+    public AuthnRequest getAuthnRequest() {
         return authnRequest;
-    }
-
-    public ServiceResponse getServiceResponse() {
-        return serviceResponse;
     }
 
     public Principal getPrincipal() {
         return principal;
+    }
+
+    @Override
+    public void accept(ServiceResponseVisitor visitor) {
+        visitor.visit(this);
     }
 }

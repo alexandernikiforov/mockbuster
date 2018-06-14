@@ -18,8 +18,9 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
+import ch.alni.mockbuster.core.domain.AssertionConsumerService;
 import ch.alni.mockbuster.core.domain.ServiceProvider;
-import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.service.ServiceRequestTicket;
 import ch.alni.mockbuster.service.events.ServiceEvent;
 import org.oasis.saml2.protocol.ResponseType;
 
@@ -29,26 +30,29 @@ import org.oasis.saml2.protocol.ResponseType;
 public class AuthnResponsePrepared implements ServiceEvent {
     private final ResponseType responseType;
     private final ServiceProvider serviceProvider;
-    private final ServiceResponse serviceResponse;
+    private final AssertionConsumerService returnDestination;
+    private final ServiceRequestTicket serviceRequestTicket;
 
-    public AuthnResponsePrepared(ResponseType responseType, ServiceProvider serviceProvider, ServiceResponse serviceResponse) {
+    public AuthnResponsePrepared(ResponseType responseType,
+                                 ServiceProvider serviceProvider,
+                                 AssertionConsumerService returnDestination,
+                                 ServiceRequestTicket serviceRequestTicket) {
         this.responseType = responseType;
         this.serviceProvider = serviceProvider;
-        this.serviceResponse = serviceResponse;
-    }
-
-    public AuthnResponsePrepared(ResponseType responseType, ServiceResponse serviceResponse) {
-        this.responseType = responseType;
-        this.serviceProvider = null;
-        this.serviceResponse = serviceResponse;
+        this.returnDestination = returnDestination;
+        this.serviceRequestTicket = serviceRequestTicket;
     }
 
     public ResponseType getResponseType() {
         return responseType;
     }
 
-    public ServiceResponse getServiceResponse() {
-        return serviceResponse;
+    public ServiceRequestTicket getServiceRequestTicket() {
+        return serviceRequestTicket;
+    }
+
+    public AssertionConsumerService getReturnDestination() {
+        return returnDestination;
     }
 
     public ServiceProvider getServiceProvider() {

@@ -18,7 +18,6 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
-import ch.alni.mockbuster.core.domain.AssertionConsumerServices;
 import ch.alni.mockbuster.core.domain.IdentityProvider;
 import ch.alni.mockbuster.core.domain.ServiceProvider;
 import ch.alni.mockbuster.saml2.NameIdFormat;
@@ -33,25 +32,28 @@ import org.oasis.saml2.protocol.NameIDPolicyType;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static ch.alni.mockbuster.saml2.SamlResponseStatus.REQUEST_DENIED;
 import static ch.alni.mockbuster.service.profile.validation.SamlRequestValidationResultFactory.makeInvalid;
 import static ch.alni.mockbuster.service.profile.validation.SamlRequestValidationResultFactory.makeValid;
 
 class AuthnRequestValidation {
 
     private final IdentityProvider identityProvider;
-    private final ServiceProvider serviceProvider;
 
-    private final SamlRequestValidator<AuthnRequestType> authnRequestTypeSamlRequestValidator =
-            new SamlRequestValidator<>(Arrays.asList(
-                    this::validateSubject,
-                    this::validateAssertionConsumerService,
-                    this::validateIssuerNameIdFormat,
-                    this::validateNameIdPolicy
-            ));
+    private final SamlRequestValidator<AuthnRequestType> authnRequestTypeSamlRequestValidator;
 
     AuthnRequestValidation(IdentityProvider identityProvider, ServiceProvider serviceProvider) {
         this.identityProvider = identityProvider;
-        this.serviceProvider = serviceProvider;
+
+        AuthnRequestSignatureValidation signatureValidation = new AuthnRequestSignatureValidation(identityProvider, serviceProvider);
+
+        authnRequestTypeSamlRequestValidator =
+                new SamlRequestValidator<>(Arrays.asList(
+                        this::validateSubject,
+                        this::validateIssuerNameIdFormat,
+                        this::validateNameIdPolicy,
+                        signatureValidation::validateSignature
+                ));
     }
 
     SamlRequestValidationResult validateRequest(AuthnRequestType authnRequestType) {
@@ -68,7 +70,7 @@ class AuthnRequestValidation {
                 makeValid() :
                 makeInvalid(
                         "the Format attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity.",
-                        SamlResponseStatus.REQUEST_DENIED
+                        REQUEST_DENIED
                 );
     }
 
@@ -96,41 +98,12 @@ class AuthnRequestValidation {
         if (subjectConfirmationFound) {
             return makeInvalid(
                     "the element <Subject> MUST NOT contain any <SubjectConfirmation> elements",
-                    SamlResponseStatus.REQUEST_DENIED
+                    REQUEST_DENIED
             );
         } else {
             return makeValid();
         }
     }
 
-    private SamlRequestValidationResult validateAssertionConsumerService(AuthnRequestType authnRequestType) {
-        String assertionConsumerServiceUrl = authnRequestType.getAssertionConsumerServiceURL();
-        Integer assertionConsumerServiceIndex = authnRequestType.getAssertionConsumerServiceIndex();
-        if (null != assertionConsumerServiceUrl) {
-            if (AssertionConsumerServices.containsAssertionServiceUrl(serviceProvider.getAssertionConsumerServices(),
-                    assertionConsumerServiceUrl)) {
-                return makeValid();
-            } else {
-                return makeInvalid(
-                        "assertionConsumerServiceUrl not found",
-                        SamlResponseStatus.REQUEST_DENIED
-                );
-            }
-        } else if (null != assertionConsumerServiceIndex) {
-            if (AssertionConsumerServices.containsAssertionServiceIndex(serviceProvider.getAssertionConsumerServices(),
-                    assertionConsumerServiceIndex)) {
-                return makeValid();
-            } else {
-                return makeInvalid(
-                        "assertionConsumerServiceUrl not found",
-                        SamlResponseStatus.REQUEST_DENIED
-                );
-            }
-        } else {
-            return makeInvalid(
-                    "either assertionConsumerServiceURL or assertionConsumerServiceIndex must be provided",
-                    SamlResponseStatus.REQUEST_DENIED
-            );
-        }
-    }
+
 }

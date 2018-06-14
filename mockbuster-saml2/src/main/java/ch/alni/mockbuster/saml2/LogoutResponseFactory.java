@@ -16,10 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.alni.mockbuster.service.profile.logout;
+package ch.alni.mockbuster.saml2;
 
-import ch.alni.mockbuster.saml2.SamlResponseStatus;
-import ch.alni.mockbuster.service.ServiceConfiguration;
 import org.oasis.saml2.assertion.NameIDType;
 import org.oasis.saml2.protocol.LogoutRequestType;
 import org.oasis.saml2.protocol.StatusCodeType;
@@ -32,18 +30,14 @@ import java.util.UUID;
 /**
  * Response assembler according to the rules of the Web Browser SSO profile.
  */
-class LogoutResponseFactory {
+public final class LogoutResponseFactory {
     private static final String SAML_VERSION = "2.0";
 
-    private final ServiceConfiguration serviceConfiguration;
-
-    LogoutResponseFactory(ServiceConfiguration serviceConfiguration) {
-        this.serviceConfiguration = serviceConfiguration;
+    private LogoutResponseFactory() {
     }
 
-    StatusResponseType makeStatusResponse(LogoutRequestType request, SamlResponseStatus responseStatus) {
+    public static StatusResponseType makeStatusResponse(String responseIssuer, LogoutRequestType request, SamlResponseStatus responseStatus) {
         final String requestId = request.getID();
-        final String responseIssuer = serviceConfiguration.getServiceId();
         final Instant now = Instant.now();
 
         return StatusResponseType.builder()

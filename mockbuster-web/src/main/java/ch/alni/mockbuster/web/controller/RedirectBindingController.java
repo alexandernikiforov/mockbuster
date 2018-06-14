@@ -44,7 +44,7 @@ public class RedirectBindingController {
     @RequestMapping(path = "/saml2/sso/post", method = RequestMethod.POST)
     public ResponseEntity<?> authenticate(@RequestBody MultiValueMap<String, String> formParameterMap) {
         final String encodedSamlRequest = formParameterMap.getFirst("SAMLRequest");
-        final String relayStateToken = formParameterMap.getFirst("RelayState");
+        final String relayState = formParameterMap.getFirst("RelayState");
 
         mockbusterSsoService.authenticate(encodedSamlRequest, null);
         return ResponseEntity.ok().build();
@@ -53,7 +53,7 @@ public class RedirectBindingController {
     @RequestMapping(path = "/saml2/sso/logout", method = RequestMethod.POST)
     public ResponseEntity<?> logout(@RequestBody MultiValueMap<String, String> formParameterMap) {
         final String encodedSamlRequest = formParameterMap.getFirst("SAMLRequest");
-        final String relayStateToken = formParameterMap.getFirst("RelayState");
+        final String relayState = formParameterMap.getFirst("RelayState");
 
 
         return ResponseEntity.ok().build();

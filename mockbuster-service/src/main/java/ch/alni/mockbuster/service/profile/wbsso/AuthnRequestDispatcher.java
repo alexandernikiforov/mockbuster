@@ -18,21 +18,23 @@
 
 package ch.alni.mockbuster.service.profile.wbsso;
 
-import ch.alni.mockbuster.core.domain.NameId;
-import ch.alni.mockbuster.core.domain.Principal;
-import ch.alni.mockbuster.core.domain.PrincipalRepository;
-import ch.alni.mockbuster.core.domain.ServiceProvider;
-import ch.alni.mockbuster.saml2.SamlResponseStatus;
-import ch.alni.mockbuster.service.ServiceResponse;
+import ch.alni.mockbuster.core.domain.*;
+import ch.alni.mockbuster.saml2.*;
+import ch.alni.mockbuster.service.ServiceRequestTicket;
 import ch.alni.mockbuster.service.events.EventBus;
+import ch.alni.mockbuster.service.events.ServiceEvent;
+import ch.alni.mockbuster.service.session.Session;
+import ch.alni.mockbuster.service.session.SessionRepository;
 import org.apache.commons.lang.BooleanUtils;
+import org.oasis.saml2.assertion.AttributeStatementType;
+import org.oasis.saml2.assertion.NameIDType;
 import org.oasis.saml2.protocol.AuthnRequestType;
+import org.oasis.saml2.protocol.ResponseType;
 import org.slf4j.Logger;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import java.util.function.Consumer;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -40,59 +42,111 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class AuthnRequestDispatcher {
     private static final Logger LOG = getLogger(AuthnRequestDispatcher.class);
 
-    private final PrincipalRepository principalRepository;
+    private final SessionRepository sessionRepository;
     private final EventBus eventBus;
 
     @Inject
-    public AuthnRequestDispatcher(PrincipalRepository principalRepository, EventBus eventBus) {
-        this.principalRepository = principalRepository;
+    public AuthnRequestDispatcher(SessionRepository sessionRepository, EventBus eventBus) {
+        this.sessionRepository = sessionRepository;
         this.eventBus = eventBus;
     }
 
     @EventListener
-    public void onAuthnRequestReceived(AuthnRequestReceived event) {
-        AuthnRequestType authnRequest = event.getAuthnRequest();
-        ServiceResponse serviceResponse = event.getServiceResponse();
-        ServiceProvider serviceProvider = event.getServiceProvider();
+    public void onAuthRequestFailed(AuthnRequestFailed event) {
+        final SamlResponseStatus samlResponseStatus = event.getResponseStatus();
+        final IdentityProvider identityProvider = event.getIdentityProvider();
+        final AuthnRequestType authnRequestType = event.getAuthnRequestType();
+        final ServiceProvider serviceProvider = event.getServiceProvider();
+        final AssertionConsumerService assertionConsumerService = event.getReturnDestination();
+        final ServiceRequestTicket serviceRequestTicket = event.getServiceRequestTicket();
 
-        AuthnRequests.getSubjectIdentity(authnRequest)
-                .map(subjectIdentity -> withServiceResponseIfIdentityIsProvided(authnRequest, serviceProvider, subjectIdentity))
-                .orElseGet(() -> requireUserInteraction(authnRequest))
-                .accept(serviceResponse);
+        final ResponseType responseType = ResponseFactory.makeErrorResponse(
+                new ResponseTypeParams.Builder()
+                        .setIdentityProviderId(identityProvider.getEntityId())
+                        .setAuthnRequestType(authnRequestType)
+                        .build(),
+                samlResponseStatus
+        );
+
+        eventBus.publish(new AuthnResponsePrepared(responseType, serviceProvider, assertionConsumerService, serviceRequestTicket));
     }
 
-    private Consumer<ServiceResponse> withServiceResponseIfIdentityIsProvided(AuthnRequestType authnRequest,
-                                                                              ServiceProvider serviceProvider,
-                                                                              NameId subjectIdentity) {
-        // have we already mapped this identity to a principal?
-        return principalRepository.findByNameId(subjectIdentity)
+    @EventListener
+    public void onAuthnRequestValidated(AuthnRequestValidated event) {
+        final AuthnRequestType authnRequestType = event.getAuthnRequest();
+
+        // find identity
+        final ServiceEvent resultingEvent = AuthnRequestTypeFunctions.findSubjectIdentity(authnRequestType)
+                .map(nameIDType -> new NameId(nameIDType.getFormat(), nameIDType.getValue()))
+                // the SP provided principal identity in the request
+                .map(subjectIdentity -> respondIfIdentityIsProvided(event, subjectIdentity))
+                // no identity provided, let the user decide who he is
+                .orElseGet(() -> requireUserInteraction(event));
+
+        eventBus.publish(resultingEvent);
+    }
+
+    private ServiceEvent respondIfIdentityIsProvided(AuthnRequestValidated event, NameId subjectIdentity) {
+        Session session = sessionRepository.getCurrentSession();
+
+        // have we already established this identity in the provided session?
+        return session.getIdentities()
+                .stream()
+                .filter(principal -> principal.getNameId().equals(subjectIdentity))
+                .findFirst()
+
                 // yes - authenticate
-                .map(principal -> authenticate(authnRequest, serviceProvider, principal))
+                .map(principal -> authenticate(session, event, principal))
 
-                // no - respond with an error
-                .orElseGet(() -> sendUnknownPrincipal(authnRequest));
+                // no - let the user select the identity
+                .orElseGet(() -> requireUserInteraction(event));
     }
 
-    private Consumer<ServiceResponse> requireUserInteraction(AuthnRequestType authnRequest) {
-        return serviceResponse -> eventBus.publish(new UserInteractionRequired(authnRequest, serviceResponse));
-    }
+    private ServiceEvent authenticate(final Session session, final AuthnRequestValidated event, final Principal principal) {
+        final AuthnRequestType authnRequestType = event.getAuthnRequest();
 
-    private Consumer<ServiceResponse> authenticate(AuthnRequestType authnRequest, ServiceProvider serviceProvider, Principal principal) {
-        if (BooleanUtils.isTrue(authnRequest.isForceAuthn())) {
-            return serviceResponse -> eventBus.publish(new PrincipalAuthenticationRequired(authnRequest, principal, serviceResponse));
+        if (BooleanUtils.isTrue(authnRequestType.isForceAuthn())) {
+            // the client is forcing us to re-authenticate
+            return new UserAuthenticationRequired(event, principal);
         } else {
-            return serviceResponse ->
-                    eventBus.publish(new AuthnRequestAuthenticated(authnRequest, serviceProvider, principal, serviceResponse));
+            // create response from what we have
+            final IdentityProvider identityProvider = event.getIdentityProvider();
+            final ServiceProvider serviceProvider = event.getServiceProvider();
+            final AssertionConsumerService assertionConsumerService = event.getReturnDestination();
+
+            final AttributeStatementType attributeStatementType =
+                    AttributeStatements.toAttributeStatementType(principal.getAttributeStatement());
+
+            final NameId nameId = principal.getNameId();
+
+            final String assertionConsumerServiceUrl = assertionConsumerService.getUrl();
+
+            final ResponseType responseType = ResponseFactory.makeResponse(
+                    new ResponseTypeParams.Builder()
+                            .setAuthnRequestType(authnRequestType)
+
+                            .setIdentityProviderId(identityProvider.getEntityId())
+                            .setDeliveryValidityInSeconds(identityProvider.getDeliveryValidityInSeconds())
+
+                            .setAssertionConsumerServiceUrl(assertionConsumerServiceUrl)
+
+                            .setSessionTimeoutInSeconds(session.getTimeoutInSeconds())
+                            .setSessionIndex(session.getIndex())
+
+                            .setAttributeStatementType(attributeStatementType)
+
+                            .setSubjectIdentityId(NameIDType.builder()
+                                    .withFormat(nameId.getNameIdFormat())
+                                    .withValue(nameId.getNameId())
+                                    .build())
+                            .build()
+            );
+
+            return new AuthnResponsePrepared(responseType, serviceProvider, event.getReturnDestination(), event.getServiceRequestTicket());
         }
     }
 
-    private Consumer<ServiceResponse> sendUnknownPrincipal(AuthnRequestType authnRequest) {
-        return serviceResponse -> eventBus.publish(new AuthnRequestFailed(
-                authnRequest,
-                serviceResponse,
-                SamlResponseStatus.UNKNOWN_PRINCIPAL)
-        );
+    private ServiceEvent requireUserInteraction(AuthnRequestValidated event) {
+        return new UserSelectionRequired(event);
     }
-
-
 }

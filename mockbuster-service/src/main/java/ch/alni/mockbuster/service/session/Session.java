@@ -22,6 +22,7 @@ import ch.alni.mockbuster.core.domain.Principal;
 import org.oasis.saml2.protocol.AuthnRequestType;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface Session {
 
@@ -32,19 +33,28 @@ public interface Session {
      */
     void storeAuthnRequest(AuthnRequestType authnRequestType);
 
-    void storeAuthnRequestWithPrincipal(AuthnRequestType authnRequestType, Principal principal);
+    /**
+     * Returns stored principal identities.
+     *
+     * @return
+     */
+    Set<Principal> getIdentities();
+
+    /**
+     * Returns the session timeout value in seconds. The session is permanent if this value is null.
+     */
+    Long getTimeoutInSeconds();
 
     /**
      * Tries to find the stored AuthnRequest.
      */
     Optional<AuthnRequestType> findStoredAuthnRequest();
 
-    Optional<Principal> findStoredPrincipal();
-
     void storeIdentity(Principal principal);
 
-    Optional<Principal> findIdentity();
-
-    void clearIdentity();
+    /**
+     * Removes identity for this principal from the given session.
+     */
+    void clearIdentity(Principal principal);
 
 }

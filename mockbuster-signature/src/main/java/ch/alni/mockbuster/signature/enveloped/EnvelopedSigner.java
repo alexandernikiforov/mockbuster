@@ -19,7 +19,6 @@
 package ch.alni.mockbuster.signature.enveloped;
 
 import ch.alni.mockbuster.signature.SignatureConfiguration;
-import ch.alni.mockbuster.signature.SignatureLocation;
 import ch.alni.mockbuster.signature.xpath.NodeFinder;
 import ch.alni.mockbuster.signature.xpath.ReferenceUris;
 import org.w3c.dom.Document;
@@ -43,16 +42,17 @@ import java.util.List;
 /**
  * How to make an ENVELOPED signature in the XML dom.
  */
-public class EnvelopedSigner {
+public final class EnvelopedSigner {
     private static XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
 
-    private final SignatureConfiguration signatureConfiguration;
-
-    public EnvelopedSigner(SignatureConfiguration signatureConfiguration) {
-        this.signatureConfiguration = signatureConfiguration;
+    private EnvelopedSigner() {
     }
 
-    public void sign(Document document, String pathToElementToBeSigned, SignatureLocation signatureLocation) {
+    /**
+     * @param pathToElementToBeSigned xpath to the element in the document that should be signed
+     * @param signatureLocation       where the signature should be located in the signed document
+     */
+    public static void sign(Document document, String pathToElementToBeSigned, SignatureLocation signatureLocation, SignatureConfiguration signatureConfiguration) {
         try {
             DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(
                     signatureConfiguration.getDigestMethodUri(), null);
