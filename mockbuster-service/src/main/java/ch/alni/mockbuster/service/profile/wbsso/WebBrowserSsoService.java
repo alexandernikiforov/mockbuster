@@ -72,14 +72,7 @@ class WebBrowserSsoService implements MockbusterSsoService {
             }
 
             // do we recognize the return destination?
-            final String assertionConsumerServiceUrl = authnRequestType.getAssertionConsumerServiceURL();
-            final Integer assertionConsumerServiceIndex = authnRequestType.getAssertionConsumerServiceIndex();
-
-            AssertionConsumerService assertionConsumerService = serviceProvider.getAssertionConsumerServices()
-                    .stream()
-                    .filter(hasSameIndex(assertionConsumerServiceIndex).or(hasSameUrl(assertionConsumerServiceUrl)))
-                    .findFirst()
-                    .orElse(null);
+            AssertionConsumerService assertionConsumerService = getAssertionConsumerService(serviceProvider, authnRequestType);
 
             if (null == assertionConsumerService) {
                 LOG.info("assertion consumer service cannot be found; cannot deduce the return destination");
@@ -120,6 +113,17 @@ class WebBrowserSsoService implements MockbusterSsoService {
             LOG.info("cannot parse AuthnRequest", e);
             eventBus.publish(new AuthnRequestNotUnderstood(serviceRequest, serviceRequestTicket));
         }
+    }
+
+    private AssertionConsumerService getAssertionConsumerService(ServiceProvider serviceProvider, AuthnRequestType authnRequestType) {
+        final String assertionConsumerServiceUrl = authnRequestType.getAssertionConsumerServiceURL();
+        final Integer assertionConsumerServiceIndex = authnRequestType.getAssertionConsumerServiceIndex();
+
+        return serviceProvider.getAssertionConsumerServices()
+                .stream()
+                .filter(hasSameIndex(assertionConsumerServiceIndex).or(hasSameUrl(assertionConsumerServiceUrl)))
+                .findFirst()
+                .orElse(null);
     }
 
 }
